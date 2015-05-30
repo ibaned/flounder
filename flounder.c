@@ -1,10 +1,19 @@
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #define MAX_UP 15
 
 struct fv {
   int v[3];
+};
+
+struct fe {
+  int e[3];
+};
+
+struct ev {
+  int v[2];
 };
 
 struct x {
@@ -29,6 +38,8 @@ struct ups {
   int* n;
   int* o;
 };
+
+int const tab_fev[3][2] = {{0,1},{1,2},{2,0}};
 
 struct bits bits_new(int n)
 {
@@ -152,8 +163,6 @@ void compute_scan(int const* a, int n, int** pb)
   int* b = malloc(sizeof(int) * (n + 1));
   b[0] = 0;
   for (int i = 1; i <= n; ++i)
-/* this can be done with
-   some more fancy scan algorithm */
     b[i] = b[i - 1] + a[i];
   *pb = b;
 }
@@ -166,21 +175,18 @@ void compute_ups(int const* down, int nup, int degree,
     n[i] = 0;
   for (int i = 0; i < nup; ++i)
     for (int j = 0; j < degree; ++j)
-/* this may require atomics.
-   can't think of a non-atomic
-   algorithm. */
       ++(n[down[i * degree + j]]);
+  for (int i = 0; i < ndown; ++i)
+    assert(n[i] <= MAX_UP);
   int* o;
   compute_scan(n, ndown, &o);
   int* a = malloc(sizeof(int) * nup * degree);
   for (int i = 1; i < ndown; ++i)
-/* temporarily use n as the running counter */
     n[i] = 0;
   for (int i = 0; i < nup; ++i)
     for (int j = 0; j < degree; ++j) {
       int di = down[i * degree + j];
       a[o[di] + n[di]] = i;
-/* again, atomics. */
       ++(n[di]);
     }
   pups->a = a;
@@ -194,7 +200,7 @@ void compute_vfs(struct fv const* fvs, int nf, int nv,
   return compute_ups((int*) fvs, nf, 3, nv, pvfs);
 }
 
-int up_has(struct up* pup, int i)
+int up_has(struct up const* pup, int i)
 {
   for (int j = 0; j < pup->n; ++j)
     if (pup->e[j] == i)
@@ -202,11 +208,11 @@ int up_has(struct up* pup, int i)
   return 0;
 }
 
-void get_vf(struct ups vfs, int i, struct up* pvf)
+void get_up(struct ups const ups, int i, struct up* pup)
 {
-  pvf->n = vfs.n[i];
-  for (int j = 0; j < vfs.n[i]; ++j)
-    pvf->e[j] = vfs.a[vfs.o[i] + j];
+  pup->n = ups.n[i];
+  for (int j = 0; j < ups.n[i]; ++j)
+    pup->e[j] = ups.a[ups.o[i] + j];
 }
 
 void compute_vv(struct fv const* fvs, int vi, struct up const* vf, struct up* pvv)
@@ -224,13 +230,13 @@ void compute_vv(struct fv const* fvs, int vi, struct up const* vf, struct up* pv
 }
 
 void compute_vvs(struct fv const* fvs, int nf, int nv,
-    struct ups vfs, struct ups* pvvs)
+    struct ups const vfs, struct ups* pvvs)
 {
   struct up vf;
   struct up vv;
   int* n = malloc(sizeof(int) * nv);
   for (int i = 0; i < nv; ++i) {
-    get_vf(vfs, i, &vf);
+    get_up(vfs, i, &vf);
     compute_vv(fvs, i, &vf, &vv);
     n[i] = vv.n;
   }
@@ -239,7 +245,7 @@ void compute_vvs(struct fv const* fvs, int nf, int nv,
   int nvv = o[nv];
   int* a = malloc(sizeof(int) * nvv);
   for (int i = 0; i < nv; ++i) {
-    get_vf(vfs, i, &vf);
+    get_up(vfs, i, &vf);
     compute_vv(fvs, i, &vf, &vv);
     for (int j = 0; j < vv.n; ++j)
       a[o[i] + j] = vv.e[j];
@@ -247,4 +253,83 @@ void compute_vvs(struct fv const* fvs, int nf, int nv,
   pvvs->a = a;
   pvvs->n = n;
   pvvs->o = o;
+}
+
+void compute_evs(struct ups const vvs, int nv,
+    int* pne, struct ev** pevs)
+{
+  int nvvs = vvs.o[nv];
+  assert(nvvs % 2 == 0);
+  int ne = nvvs / 2;
+  int* nh = malloc(sizeof(int) * nv);
+  for (int i = 0; i < nv; ++i) {
+    nh[i] = 0;
+    for (int j = 0; j < vvs.n[i]; ++j)
+      if (i < vvs.a[vvs.o[i] + j])
+        ++(nh[i]);
+  }
+  int* oh;
+  compute_scan(nh, nv, &oh);
+  free(nh);
+  struct ev* evs = malloc(sizeof(struct ev) * ne);
+  for (int i = 0; i < nv; ++i) {
+    int k = 0;
+    for (int j = 0; j < vvs.n[i]; ++j) {
+      int oi = vvs.a[vvs.o[i] + j];
+      if (i < oi) {
+        struct ev ev = {i, oi};
+        evs[oh[i] + (k++)] = ev;
+      }
+    }
+  }
+  free(oh);
+  *pne = ne;
+  *pevs = evs;
+}
+
+void compute_ves(struct ev const* evs, int ne, int nv,
+    struct ups* pves)
+{
+  compute_ups((int*) evs, ne, 2, nv, pves);
+}
+
+void intersect(struct up* a, struct up const* b)
+{
+  int j;
+  for (int i = 0; i < a->n; ++i)
+    if (up_has(b, a->e[i]))
+      a->e[j++] = a->e[i];
+  a->n = j;
+}
+
+void compute_common_up(int const* down, int ndown,
+    struct ups ups, struct up* pcup)
+{
+  struct up tup;
+  get_up(ups, down[0], pcup);
+  for (int i = 1; i < ndown; ++i) {
+    get_up(ups, down[i], &tup);
+    intersect(pcup, &tup);
+  }
+}
+
+void compute_fes(struct fv const* fvs, int nf,
+    struct ups ves, struct fe** pfes)
+{
+  struct fe* fes = malloc(sizeof(struct fe) * nf);
+  for (int i = 0; i < nf; ++i) {
+    struct fv fv = fvs[i];
+    struct fe fe;
+    for (int j = 0; j < 3; ++j) {
+      int ev[2];
+      for (int k = 0; k < 2; ++k)
+        ev[k] = fv.v[tab_fev[j][k]];
+      struct up cup;
+      compute_common_up(fv.v, 3, ves, &cup);
+      assert(cup.n == 1);
+      fe.e[j] = cup.e[0];
+    }
+    fes[i] = fe;
+  }
+  *pfes = fes;
 }
