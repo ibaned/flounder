@@ -16,6 +16,10 @@ int main()
   struct graph vvs = graph_rgraph_transit(vfs, fvs);
   printf("\nvvs:\n");
   graph_print(vvs);
+  struct rgraph evs = graph_bridge(vvs);
+  printf("\nevs:\n");
+  rgraph_print(evs);
+  rgraph_free(evs);
   graph_free(vvs);
   graph_free(vfs);
   rgraph_free(fvs);
