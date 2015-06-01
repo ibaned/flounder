@@ -59,10 +59,6 @@ struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
       adj_unite(&ta, ra);
     }
     adj_remove(&ta, i);
-    printf("graph_set(, %d, %d {", i, ta.n);
-    for (int j = 0; j < ta.n; ++j)
-      printf(" %d", ta.e[j]);
-    printf("})\n");
     graph_set(tg, i, ta);
   }
   adj_free(ga);
