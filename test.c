@@ -13,6 +13,10 @@ int main()
   struct graph vfs = rgraph_invert(fvs);
   printf("\nvfs:\n");
   graph_print(vfs);
+  struct graph vvs = graph_rgraph_transit(vfs, fvs);
+  printf("\nvvs:\n");
+  graph_print(vvs);
+  graph_free(vvs);
   graph_free(vfs);
   rgraph_free(fvs);
 }

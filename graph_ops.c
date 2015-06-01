@@ -1,5 +1,6 @@
 #include "graph_ops.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 struct graph rgraph_invert(struct rgraph rg)
 {
@@ -58,7 +59,11 @@ struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
       adj_unite(&ta, ra);
     }
     adj_remove(&ta, i);
-    graph_set(g, i, ta);
+    printf("graph_set(, %d, %d {", i, ta.n);
+    for (int j = 0; j < ta.n; ++j)
+      printf(" %d", ta.e[j]);
+    printf("})\n");
+    graph_set(tg, i, ta);
   }
   adj_free(ga);
   adj_free(ra);
