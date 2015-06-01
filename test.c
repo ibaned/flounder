@@ -19,6 +19,10 @@ int main()
   struct rgraph evs = graph_bridge(vvs);
   printf("\nevs:\n");
   rgraph_print(evs);
+  struct graph ves = rgraph_invert(evs);
+  printf("\nves:\n");
+  graph_print(ves);
+  graph_free(ves);
   rgraph_free(evs);
   graph_free(vvs);
   graph_free(vfs);
