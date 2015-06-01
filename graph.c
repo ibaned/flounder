@@ -1,5 +1,6 @@
 #include "graph.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 struct graph_spec graph_spec_new(int nverts)
 {
@@ -39,4 +40,16 @@ int graph_max_deg(struct graph g)
       max = deg;
   }
   return max;
+}
+
+void graph_print(struct graph g)
+{
+  printf("graph %d verts\n", g.nverts);
+  for (int i = 0; i < g.nverts; ++i) {
+    printf("%d:", i);
+    int o = g.offsets[i];
+    for (int j = 0; j < graph_deg(g, i); ++j)
+      printf(" %d", g.adjacent[o + j]);
+    printf("\n");
+  }
 }

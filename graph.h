@@ -51,5 +51,6 @@ static inline void graph_set(struct graph g, int i, struct adj a)
 }
 
 int graph_max_deg(struct graph g);
+void graph_print(struct graph g);
 
 #endif
