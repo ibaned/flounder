@@ -1,5 +1,5 @@
-#ifndef ADJACENT_H
-#define ADJACENT_H
+#ifndef ADJ_H
+#define ADJ_H
 
 #include <assert.h>
 

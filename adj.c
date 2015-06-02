@@ -1,4 +1,4 @@
-#include "adjacent.h"
+#include "adj.h"
 #include <stdlib.h>
 
 struct adj adj_new(int c)
