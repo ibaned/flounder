@@ -32,7 +32,7 @@ struct graph rgraph_invert(struct rgraph rg)
 
 struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
 {
-  struct adj ga = adj_new(graph_max_deg(g));
+  struct adj ga = adj_new(g.max_deg);
   struct adj ra = adj_new(rg.degree);
   ra.n = rg.degree;
   struct adj ta = adj_new(ga.c * ra.c);
@@ -73,7 +73,7 @@ struct rgraph graph_bridge(struct graph g)
   assert(nhe % 2 == 0);
   int ne = nhe / 2;
   struct rgraph rg = rgraph_new(ne, 2);
-  struct adj a = adj_new(graph_max_deg(g));
+  struct adj a = adj_new(g.max_deg);
   int ra[2];
   int k = 0;
   for (int i = 0; i < g.nverts; ++i) {

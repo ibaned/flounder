@@ -12,7 +12,7 @@ struct graph_spec {
 
 struct graph {
   int nverts;
-  int padding_;
+  int max_deg;
   int* offsets;
   int* adjacent;
 };
@@ -50,7 +50,6 @@ static inline void graph_set(struct graph g, int i, struct adj a)
     *p++ = *q++;
 }
 
-int graph_max_deg(struct graph g);
 void graph_print(struct graph g);
 
 #endif
