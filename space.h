@@ -1,7 +1,7 @@
 #ifndef SPACE_H
 #define SPACE_H
 
-#include "graph.h"
+#include "bits.h"
 #include "rgraph.h"
 
 /* how many different things can we call "x"... */
@@ -18,6 +18,11 @@ struct xs {
   struct x* x;
 };
 
+struct ss {
+  int n;
+  double* s;
+};
+
 struct xs xs_new(int n);
 void xs_free(struct xs xs);
 
@@ -31,10 +36,11 @@ static inline struct fx fx_get(struct xs xs, struct rgraph fvs, int i)
   return fx;
 }
 
-double fx_area(struct fx fx)
-{
-  return (fx.x[0].x[0] * fx.x[1].x[1] -
-          fx.x[0].x[1] * fx.x[1].x[0]) / 2;
-}
+struct ss ss_new(int n);
+void ss_free(struct ss ss);
+
+struct bits ss_gt(struct ss a, struct ss b);
+
+struct ss compute_areas(struct xs xs, struct rgraph fvs);
 
 #endif
