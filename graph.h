@@ -1,7 +1,7 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include "adjacent.h"
+#include "adj.h"
 #include <assert.h>
 
 struct graph_spec {
