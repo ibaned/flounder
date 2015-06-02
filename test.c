@@ -1,4 +1,5 @@
 #include "graph_ops.h"
+#include "adj_ops.h"
 #include <stdio.h>
 
 int main()
@@ -22,6 +23,10 @@ int main()
   struct graph ves = rgraph_invert(evs);
   printf("\nves:\n");
   graph_print(ves);
+  struct rgraph fes = compute_fes(fvs, ves);
+  printf("\nfes:\n");
+  rgraph_print(fes);
+  rgraph_free(fes);
   graph_free(ves);
   rgraph_free(evs);
   graph_free(vvs);
