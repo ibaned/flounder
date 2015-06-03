@@ -1,4 +1,6 @@
 #include "refine.h"
+#include "graph_ops.h"
+#include "adj_ops.h"
 #include <float.h>
 
 static struct bits mark_fes(struct rgraph fes, struct bits bfs, int ne)
@@ -73,7 +75,7 @@ static struct bits compute_best_indset(struct bits ecss, struct graph ees,
       if (bits_get(enss, i))
         continue;
       double q = eqs.s[i];
-      graph_get(ees, i, ee);
+      graph_get(ees, i, &ee);
       for (int j = 0; j < ee.n; ++j)
         if (bits_get(ewss, ee.e[j])) {
           bits_set(enss, i);
