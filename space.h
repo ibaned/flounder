@@ -34,7 +34,7 @@ static inline double x_cross(struct x a, struct x b)
 
 static inline struct x x_sub(struct x a, struct x b)
 {
-  struct c;
+  struct x c;
   c.x[0] = a.x[0] - b.x[0];
   c.x[1] = a.x[1] - b.x[1];
   return c;
@@ -42,7 +42,7 @@ static inline struct x x_sub(struct x a, struct x b)
 
 static inline struct x x_add(struct x a, struct x b)
 {
-  struct c;
+  struct x c;
   c.x[0] = a.x[0] + b.x[0];
   c.x[1] = a.x[1] + b.x[1];
   return c;
@@ -50,7 +50,7 @@ static inline struct x x_add(struct x a, struct x b)
 
 static inline struct x x_div(struct x a, double b)
 {
-  struct c;
+  struct x c;
   c.x[0] = a.x[0] / b;
   c.x[1] = a.x[1] / b;
   return c;

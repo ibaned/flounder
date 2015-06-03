@@ -1,5 +1,6 @@
 #include "bits.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 struct bits bits_new(int nbits)
 {
@@ -20,6 +21,6 @@ void bits_free(struct bits b)
 void bits_print(struct bits b)
 {
   printf("bits (%d)\n", b.n);
-  for (int i = 0; i < n; ++i)
+  for (int i = 0; i < b.n; ++i)
     printf("%d: %d\n", i, bits_get(b, i));
 }
