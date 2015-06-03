@@ -4,6 +4,7 @@
 struct bits bits_new(int nbits)
 {
   struct bits b;
+  b.n = nbits;
   int nbytes = nbits / 8;
   if (nbits % 8)
     ++nbytes;
@@ -11,28 +12,14 @@ struct bits bits_new(int nbits)
   return b;
 }
 
-int bits_get(struct bits b, int i)
-{
-  int byte = i / 8;
-  int bit = i % 8;
-  return (b.bytes[byte] & (1 << bit)) != 0;
-}
-
-void bits_set(struct bits b, int i)
-{
-  int byte = i / 8;
-  int bit = i % 8;
-  b.bytes[byte] |= (1 << bit);
-}
-
-void bits_clear(struct bits b, int i)
-{
-  int byte = i / 8;
-  int bit = i % 8;
-  b.bytes[byte] &= ~(1 << bit);
-}
-
 void bits_free(struct bits b)
 {
   free(b.bytes);
+}
+
+void bits_print(struct bits b)
+{
+  printf("bits (%d)\n", b.n);
+  for (int i = 0; i < n; ++i)
+    printf("%d: %d\n", i, bits_get(b, i));
 }

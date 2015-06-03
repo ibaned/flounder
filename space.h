@@ -10,10 +10,6 @@ struct x {
   double x[2];
 };
 
-struct fx {
-  struct x x[3];
-};
-
 struct xs {
   struct x* x;
 };
@@ -26,20 +22,73 @@ struct ss {
 struct xs xs_new(int n);
 void xs_free(struct xs xs);
 
-static inline struct fx fx_get(struct xs xs, struct rgraph fvs, int i)
-{
-  struct fx fx;
-  int fv[3];
-  rgraph_get(fvs, i, fv);
-  for (int j = 0; j < 3; ++j)
-    fx.x[j] = xs.x[fv[i]];
-  return fx;
-}
-
 struct ss ss_new(int n);
 void ss_free(struct ss ss);
 
 struct bits ss_gt(struct ss a, struct ss b);
+
+static inline double x_cross(struct x a, struct x b)
+{
+  return a.x[0] * b.x[1] - a.x[1] * b.x[0];
+}
+
+static inline struct x x_sub(struct x a, struct x b)
+{
+  struct c;
+  c.x[0] = a.x[0] - b.x[0];
+  c.x[1] = a.x[1] - b.x[1];
+  return c;
+}
+
+static inline struct x x_add(struct x a, struct x b)
+{
+  struct c;
+  c.x[0] = a.x[0] + b.x[0];
+  c.x[1] = a.x[1] + b.x[1];
+  return c;
+}
+
+static inline struct x x_div(struct x a, double b)
+{
+  struct c;
+  c.x[0] = a.x[0] / b;
+  c.x[1] = a.x[1] / b;
+  return c;
+}
+
+static inline struct x x_avg(struct x a, struct x b)
+{
+  return x_div(x_add(a, b), 2);
+}
+
+static inline double x_dot(struct x a, struct x b)
+{
+  return a.x[0] * b.x[0] + a.x[1] * b.x[1];
+}
+
+static inline double fx_area(struct x x[3])
+{
+  return x_cross(x_sub(x[1], x[0]), x_sub(x[2], x[0])) / 2;
+}
+
+static inline double fx_qual(struct x x[3])
+{
+  double s;
+  struct x v;
+  v = x_sub(x[1], x[0]);
+  s  = x_dot(v, v);
+  v = x_sub(x[2], x[1]);
+  s += x_dot(v, v);
+  v = x_sub(x[0], x[2]);
+  s += x_dot(v, v);
+  return fx_area(x) / s; /* todo: normalize */
+}
+
+static inline void xs_get(struct xs xs, int const v[], int nv, struct x x[])
+{
+  for (int i = 0; i < nv; ++i)
+    x[i] = xs.x[v[i]];
+}
 
 struct ss compute_areas(struct xs xs, struct rgraph fvs);
 
