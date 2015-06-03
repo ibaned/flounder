@@ -23,6 +23,7 @@ struct xs xs_new(int n);
 void xs_free(struct xs xs);
 
 struct ss ss_new(int n);
+struct ss ss_new_const(int n, double v);
 void ss_free(struct ss ss);
 
 struct bits ss_gt(struct ss a, struct ss b);

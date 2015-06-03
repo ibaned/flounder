@@ -21,6 +21,14 @@ struct ss ss_new(int n)
   return ss;
 }
 
+struct ss ss_new_const(int n, double v)
+{
+  struct ss ss = ss_new(n);
+  for (int i = 0; i < ss.n; ++i)
+    ss.s[i] = v;
+  return ss;
+}
+
 void ss_free(struct ss ss)
 {
   free(ss.s);
