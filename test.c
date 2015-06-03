@@ -1,35 +1,29 @@
-#include "graph_ops.h"
-#include "adj_ops.h"
+#include "refine.h"
 #include <stdio.h>
 
 int main()
 {
-  int const dat[6] = {
+  int const fvs_dat[6] = {
     0,1,2,
     2,3,0
   };
-  struct rgraph fvs = rgraph_new_from_dat(2, 3, dat);
+  struct x const x_dat[4] = {
+    {0,0},
+    {1,0},
+    {1,1},
+    {0,1}
+  };
+  struct rgraph fvs = rgraph_new_from_dat(2, 3, fvs_dat);
   printf("\nfvs:\n");
   rgraph_print(fvs);
-  struct graph vfs = rgraph_invert(fvs);
-  printf("\nvfs:\n");
-  graph_print(vfs);
-  struct graph vvs = graph_rgraph_transit(vfs, fvs);
-  printf("\nvvs:\n");
-  graph_print(vvs);
-  struct rgraph evs = graph_bridge(vvs);
-  printf("\nevs:\n");
-  rgraph_print(evs);
-  struct graph ves = rgraph_invert(evs);
-  printf("\nves:\n");
-  graph_print(ves);
-  struct rgraph fes = compute_fes(fvs, ves);
-  printf("\nfes:\n");
-  rgraph_print(fes);
-  rgraph_free(fes);
-  graph_free(ves);
-  rgraph_free(evs);
-  graph_free(vvs);
-  graph_free(vfs);
+  struct xs xs = xs_new_from_dat(4, x_dat);
+  printf("\nxs:\n");
+  xs_print(xs);
+  struct ss dss = ss_new_const(2, 0.25);
+  printf("\ndss:\n");
+  ss_print(dss);
+  ss_free(dss);
+  xs_free(xs);
   rgraph_free(fvs);
+  return 0;
 }
