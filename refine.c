@@ -70,7 +70,8 @@ static struct bits compute_best_indset(struct bits ecss, struct graph ees,
     bits_clear(enss, i);
   struct adj ee = adj_new(ees.max_deg);
   int done = 0;
-  for (int iters = 0; !done; ++iters) {
+  for (int iter = 0; !done; ++iter) {
+    done = 1;
     for (int i = 0; i < ecss.n; ++i) {
       if (!bits_get(ecss, i))
         continue;
@@ -83,16 +84,22 @@ static struct bits compute_best_indset(struct bits ecss, struct graph ees,
       for (int j = 0; j < ee.n; ++j)
         if (bits_get(ewss, ee.e[j])) {
           bits_set(enss, i);
-          continue;
+          goto next_edge;
         }
       int local_max = 1;
       for (int j = 0; j < ee.n; ++j) {
+        if (bits_get(enss, ee.e[j]))
+          continue;
         double oq = eqs.s[ee.e[j]];
         if (oq >= q) /* todo: tiebreaker ? */
           local_max = 0;
       }
       if (local_max)
         bits_set(ewss, i);
+      else
+        done = 0;
+next_edge:
+      continue;
     }
   }
   bits_free(enss);
