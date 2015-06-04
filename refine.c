@@ -4,18 +4,17 @@
 #include <float.h>
 #include <stdio.h>
 
-static struct bits mark_fes(struct graph efs, struct bits bfs)
+static struct ints mark_fes(struct graph efs, struct ints bfs)
 {
-  struct bits ecss = bits_new(efs.nverts);
+  struct ints ecss = ints_new(efs.nverts);
+  ints_zero(ecss);
   int fe[3];
-  for (int i = 0; i < efs.nverts; ++i)
-    bits_clear(ecss, i);
   struct adj ef = adj_new(efs.max_deg);
   for (int i = 0; i < efs.nverts; ++i) {
     graph_get(efs, i, &ef);
     for (int j = 0; j < ef.n; ++j)
-      if (bits_get(bfs, ef.e[j])) {
-        bits_set(ecss, i);
+      if (bfs.i[ef.e[j]]) {
+        ecss.i[i] = 1;
         break;
       }
   }
@@ -23,13 +22,13 @@ static struct bits mark_fes(struct graph efs, struct bits bfs)
   return ecss;
 }
 
-static struct ss compute_split_quals(struct bits ecss, struct rgraph evs,
+static struct ss compute_split_quals(struct ints ecss, struct rgraph evs,
     struct graph efs, struct rgraph fvs, struct xs xs)
 {
   struct ss eqs = ss_new(efs.nverts);
   struct adj ef = adj_new(2);
   for (int i = 0; i < ecss.n; ++i) {
-    if (!bits_get(ecss, i))
+    if (!ecss.i[i])
       continue;
     int ev[2];
     rgraph_get(evs, i, ev);
@@ -59,43 +58,41 @@ static struct ss compute_split_quals(struct bits ecss, struct rgraph evs,
   return eqs;
 }
 
-static struct bits compute_best_indset(struct bits ecss, struct graph ees,
+static struct ints compute_best_indset(struct ints ecss, struct graph ees,
     struct ss eqs)
 {
-  struct bits ewss = bits_new(ecss.n);
-  for (int i = 0; i < ewss.n; ++i)
-    bits_clear(ewss, i);
-  struct bits enss = bits_new(ecss.n);
-  for (int i = 0; i < enss.n; ++i)
-    bits_clear(enss, i);
+  struct ints ewss = ints_new(ecss.n);
+  ints_zero(ewss);
+  struct ints enss = ints_new(ecss.n);
+  ints_zero(enss);
   struct adj ee = adj_new(ees.max_deg);
   int done = 0;
   for (int iter = 0; !done; ++iter) {
     done = 1;
     for (int i = 0; i < ecss.n; ++i) {
-      if (!bits_get(ecss, i))
+      if (!ecss.i[i])
         continue;
-      if (bits_get(ewss, i))
+      if (ewss.i[i])
         continue;
-      if (bits_get(enss, i))
+      if (enss.i[i])
         continue;
       double q = eqs.s[i];
       graph_get(ees, i, &ee);
       for (int j = 0; j < ee.n; ++j)
-        if (bits_get(ewss, ee.e[j])) {
-          bits_set(enss, i);
+        if (ewss.i[ee.e[j]]) {
+          enss.i[i] = 1;
           goto next_edge;
         }
       int local_max = 1;
       for (int j = 0; j < ee.n; ++j) {
-        if (bits_get(enss, ee.e[j]))
+        if (enss.i[ee.e[j]])
           continue;
         double oq = eqs.s[ee.e[j]];
         if (oq >= q) /* todo: tiebreaker ? */
           local_max = 0;
       }
       if (local_max)
-        bits_set(ewss, i);
+        ewss.i[i] = 1;
       else
         done = 0;
 next_edge:
@@ -103,7 +100,7 @@ next_edge:
     }
   }
   adj_free(ee);
-  bits_free(enss);
+  ints_free(enss);
   return ewss;
 }
 
@@ -131,26 +128,26 @@ void refine(struct rgraph fvs, struct xs xs, struct ss dss,
   struct ss as = compute_areas(xs, fvs);
   printf("\nas:\n");
   ss_print(as);
-  struct bits bfs = ss_gt(as, dss);
+  struct ints bfs = ss_gt(as, dss);
   printf("\nbfs:\n");
-  bits_print(bfs);
-  struct bits ecss = mark_fes(efs, bfs);
+  ints_print(bfs);
+  struct ints ecss = mark_fes(efs, bfs);
   printf("\necss:\n");
-  bits_print(ecss);
+  ints_print(ecss);
   struct ss eqs = compute_split_quals(ecss, evs, efs, fvs, xs);
   printf("\neqs:\n");
   ss_print(eqs);
   struct graph ees = graph_rgraph_transit(efs, fes);
   printf("\nees:\n");
   graph_print(ees);
-  struct bits ewss = compute_best_indset(ecss, ees, eqs);
+  struct ints ewss = compute_best_indset(ecss, ees, eqs);
   printf("\newss:\n");
-  bits_print(ewss);
-  bits_free(ewss);
+  ints_print(ewss);
+  ints_free(ewss);
   graph_free(ees);
   ss_free(eqs);
-  bits_free(ecss);
-  bits_free(bfs);
+  ints_free(ecss);
+  ints_free(bfs);
   ss_free(as);
   graph_free(efs);
   rgraph_free(fes);

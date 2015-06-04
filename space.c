@@ -60,15 +60,11 @@ void ss_print(struct ss ss)
     printf("%d: %f\n", i, ss.s[i]);
 }
 
-struct bits ss_gt(struct ss a, struct ss b)
+struct ints ss_gt(struct ss a, struct ss b)
 {
-  struct bits gts = bits_new(a.n);
-  for (int i = 0; i < a.n; ++i) {
-    if (a.s[i] > b.s[i])
-      bits_set(gts, i);
-    else
-      bits_clear(gts, i);
-  }
+  struct ints gts = ints_new(a.n);
+  for (int i = 0; i < a.n; ++i)
+    gts.i[i] = (a.s[i] > b.s[i]);
   return gts;
 }
 

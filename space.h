@@ -1,7 +1,7 @@
 #ifndef SPACE_H
 #define SPACE_H
 
-#include "bits.h"
+#include "ints.h"
 #include "rgraph.h"
 #include <math.h>
 
@@ -31,7 +31,7 @@ struct ss ss_new_const(int n, double v);
 void ss_free(struct ss ss);
 void ss_print(struct ss ss);
 
-struct bits ss_gt(struct ss a, struct ss b);
+struct ints ss_gt(struct ss a, struct ss b);
 
 static inline double x_cross(struct x a, struct x b)
 {
