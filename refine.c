@@ -43,8 +43,8 @@ static struct ss compute_split_quals(struct bits ecss, struct rgraph evs,
       int fv[3];
       rgraph_get(fvs, f, fv);
       struct x fx[3];
-      xs_get(xs, fv, 3, fx);
       for (int k = 0; k < 2; ++k) {
+        xs_get(xs, fv, 3, fx);
         for (int l = 0; l < 3; ++l)
           if (fv[l] == ev[k])
             fx[l] = mid;
