@@ -40,6 +40,7 @@ struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
   for (int i = 0; i < g.nverts; ++i) {
     graph_get(g, i, &ga);
     rgraph_get(rg, ga.e[0], ta.e);
+    ta.n = rg.degree;
     for (int j = 1; j < ga.n; ++j) {
       rgraph_get(rg, ga.e[j], ra.e);
       adj_unite(&ta, ra);
@@ -50,6 +51,7 @@ struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
   for (int i = 0; i < g.nverts; ++i) {
     graph_get(g, i, &ga);
     rgraph_get(rg, ga.e[0], ta.e);
+    ta.n = rg.degree;
     for (int j = 1; j < ga.n; ++j) {
       rgraph_get(rg, ga.e[j], ra.e);
       adj_unite(&ta, ra);
