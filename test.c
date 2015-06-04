@@ -22,6 +22,9 @@ int main()
   struct ss dss = ss_new_const(2, 0.25);
   printf("\ndss:\n");
   ss_print(dss);
+  struct rgraph fvs2;
+  struct xs xs2;
+  refine(fvs, xs, dss, &fvs2, &xs2);
   ss_free(dss);
   xs_free(xs);
   rgraph_free(fvs);

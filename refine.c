@@ -2,20 +2,24 @@
 #include "graph_ops.h"
 #include "adj_ops.h"
 #include <float.h>
+#include <stdio.h>
 
-static struct bits mark_fes(struct rgraph fes, struct bits bfs, int ne)
+static struct bits mark_fes(struct graph efs, struct bits bfs)
 {
-  struct bits ecss = bits_new(ne);
+  struct bits ecss = bits_new(efs.nverts);
   int fe[3];
-  for (int i = 0; i < ne; ++i)
+  for (int i = 0; i < efs.nverts; ++i)
     bits_clear(ecss, i);
-  for (int i = 0; i < fes.nverts; ++i) {
-    if (!bits_get(bfs, i))
-      continue;
-    rgraph_get(fes, i, fe);
-    for (int j = 0; j < 3; ++j)
-      bits_set(ecss, fe[j]);
+  struct adj ef = adj_new(efs.max_deg);
+  for (int i = 0; i < efs.nverts; ++i) {
+    graph_get(efs, i, &ef);
+    for (int j = 0; j < ef.n; ++j)
+      if (bits_get(bfs, ef.e[j])) {
+        bits_set(ecss, i);
+        break;
+      }
   }
+  adj_free(ef);
   return ecss;
 }
 
@@ -99,17 +103,41 @@ void refine(struct rgraph fvs, struct xs xs, struct ss dss,
     struct rgraph* fvs2, struct xs* xs2)
 {
   struct graph vfs = rgraph_invert(fvs);
+  printf("\nvfs:\n");
+  graph_print(vfs);
   struct graph vvs = graph_rgraph_transit(vfs, fvs);
+  printf("\nvvs:\n");
+  graph_print(vvs);
   struct rgraph evs = graph_bridge(vvs);
+  printf("\nevs:\n");
+  rgraph_print(evs);
   struct graph ves = rgraph_invert(evs);
+  printf("\nves:\n");
+  graph_print(ves);
   struct rgraph fes = compute_fes(fvs, ves);
+  printf("\nfes:\n");
+  rgraph_print(fes);
   struct graph efs = rgraph_invert(fes);
+  printf("\nefs:\n");
+  graph_print(efs);
   struct ss as = compute_areas(xs, fvs);
+  printf("\nas:\n");
+  ss_print(as);
   struct bits bfs = ss_gt(as, dss);
-  struct bits ecss = mark_fes(fes, bfs, efs.nverts);
+  printf("\nbfs:\n");
+  bits_print(bfs);
+  struct bits ecss = mark_fes(efs, bfs);
+  printf("\necss:\n");
+  bits_print(ecss);
   struct ss eqs = compute_split_quals(ecss, evs, efs, fvs, xs);
+  printf("\neqs:\n");
+  ss_print(eqs);
   struct graph ees = graph_rgraph_transit(efs, fes);
+  printf("\nees:\n");
+  graph_print(ees);
   struct bits ewss = compute_best_indset(ecss, ees, eqs);
+  printf("\newss:\n");
+  bits_print(ewss);
   bits_free(ewss);
   ss_free(eqs);
   bits_free(ecss);
