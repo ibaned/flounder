@@ -102,6 +102,7 @@ next_edge:
       continue;
     }
   }
+  adj_free(ee);
   bits_free(enss);
   return ewss;
 }
@@ -146,6 +147,7 @@ void refine(struct rgraph fvs, struct xs xs, struct ss dss,
   printf("\newss:\n");
   bits_print(ewss);
   bits_free(ewss);
+  graph_free(ees);
   ss_free(eqs);
   bits_free(ecss);
   bits_free(bfs);
