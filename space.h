@@ -3,6 +3,7 @@
 
 #include "bits.h"
 #include "rgraph.h"
+#include <math.h>
 
 /* how many different things can we call "x"... */
 
@@ -71,22 +72,27 @@ static inline double x_dot(struct x a, struct x b)
   return a.x[0] * b.x[0] + a.x[1] * b.x[1];
 }
 
-static inline double fx_area(struct x x[3])
+static inline double fx_area(struct x const x[3])
 {
   return x_cross(x_sub(x[1], x[0]), x_sub(x[2], x[0])) / 2;
 }
 
-static inline double fx_qual(struct x x[3])
+static inline double fx_qual(struct x const x[3])
 {
   double s;
+  double lsq;
   struct x v;
   v = x_sub(x[1], x[0]);
-  s  = x_dot(v, v);
+  lsq = x_dot(v, v);
+  s = lsq;
   v = x_sub(x[2], x[1]);
-  s += x_dot(v, v);
+  lsq = x_dot(v, v);
+  s += lsq;
   v = x_sub(x[0], x[2]);
-  s += x_dot(v, v);
-  return fx_area(x) / s; /* todo: normalize */
+  lsq = x_dot(v, v);
+  s += lsq;
+  double a = fx_area(x);
+  return (3.0 * 4.0 / sqrt(3.0)) * (a / s);
 }
 
 static inline void xs_get(struct xs xs, int const v[], int nv, struct x x[])
