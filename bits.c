@@ -24,3 +24,10 @@ void bits_print(struct bits b)
   for (int i = 0; i < b.n; ++i)
     printf("%d: %d\n", i, bits_get(b, i));
 }
+
+void bits_exscan(struct bits b, int* o)
+{
+  o[0] = 0;
+  for (int i = 0; i < b.n; ++i)
+    o[i + 1] = o[i] + bits_get(b, i);
+}

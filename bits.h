@@ -31,5 +31,6 @@ static inline void bits_clear(struct bits b, int i)
 
 void bits_free(struct bits b);
 void bits_print(struct bits b);
+void bits_exscan(struct bits b, int* o);
 
 #endif

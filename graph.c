@@ -1,4 +1,5 @@
 #include "graph.h"
+#include "array_ops.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -15,10 +16,7 @@ struct graph graph_new(struct graph_spec s)
   struct graph g;
   int nv = g.nverts = s.nverts;
   g.offsets = malloc(sizeof(int) * (nv + 1));
-  g.offsets[0] = 0;
-  for (int i = 0; i < nv; ++i)
-    /* exclusive scan summation */
-    g.offsets[i + 1] = g.offsets[i] + s.degrees[i];
+  ints_exscan(s.degrees, nv, g.offsets);
   int ne = graph_nedges(g);
   g.adjacent = malloc(sizeof(int) * ne);
   g.max_deg = 0;
