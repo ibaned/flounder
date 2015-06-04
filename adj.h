@@ -52,4 +52,6 @@ static inline void adj_remove(struct adj* a, int e)
     a->e[i] = a->e[i + 1];
 }
 
+void debug_adj(struct adj a);
+
 #endif
