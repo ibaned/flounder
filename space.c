@@ -5,6 +5,7 @@
 struct xs xs_new(int n)
 {
   struct xs xs;
+  xs.n = n;
   xs.x = malloc(sizeof(struct x) * n);
   return xs;
 }
