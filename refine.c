@@ -127,7 +127,7 @@ static struct xs split_edges(struct xs xs,
 
 static struct rgraph split_faces(struct rgraph fvs,
     struct ints bfs, struct ints ewss, struct rgraph evs,
-    struct graph efs)
+    struct graph efs, int nv)
 {
   struct ints fos = ints_exscan(bfs);
   struct ints eos = ints_exscan(ewss);
@@ -145,7 +145,7 @@ static struct rgraph split_faces(struct rgraph fvs,
       int ev[2];
       rgraph_get(evs, i, ev);
       graph_get(efs, i, &ef);
-      int sv = ewss.n + eos.i[i];
+      int sv = nv + eos.i[i];
       for (int j = 0; j < ef.n; ++j) {
         int f = ef.e[j];
         int sf[2];
@@ -209,6 +209,10 @@ void refine(struct rgraph fvs, struct xs xs, struct ss dss,
   struct xs xs2 = split_edges(xs, ewss, evs);
   printf("\nxs2:\n");
   xs_print(xs2);
+  struct rgraph fvs2 = split_faces(fvs, bfs, ewss, evs, efs, xs.n);
+  printf("\nfvs2:\n");
+  rgraph_print(fvs2);
+  rgraph_free(fvs2);
   xs_free(xs2);
   ints_free(ewss);
   graph_free(ees);
