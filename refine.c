@@ -121,6 +121,7 @@ static struct xs split_edges(struct xs xs,
       struct x mid = x_avg(ex[0], ex[1]);
       xs2.x[xs.n + eos.i[i]] = mid;
     }
+  ints_free(eos);
   return xs2;
 }
 
@@ -161,11 +162,13 @@ static struct rgraph split_faces(struct rgraph fvs,
       }
     }
   adj_free(ef);
+  ints_free(eos);
+  ints_free(fos);
   return fvs2;
 }
 
 void refine(struct rgraph fvs, struct xs xs, struct ss dss,
-    struct rgraph* fvs2, struct xs* xs2)
+    struct rgraph* pfvs2, struct xs* pxs2)
 {
   struct graph vfs = rgraph_invert(fvs);
   printf("\nvfs:\n");
@@ -203,6 +206,10 @@ void refine(struct rgraph fvs, struct xs xs, struct ss dss,
   struct ints ewss = compute_best_indset(ecss, ees, eqs);
   printf("\newss:\n");
   ints_print(ewss);
+  struct xs xs2 = split_edges(xs, ewss, evs);
+  printf("\nxs2:\n");
+  xs_print(xs2);
+  xs_free(xs2);
   ints_free(ewss);
   graph_free(ees);
   ss_free(eqs);
