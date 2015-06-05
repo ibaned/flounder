@@ -104,6 +104,61 @@ next_edge:
   return ewss;
 }
 
+static void split_edges(struct rgraph fvs, struct xs xs,
+    struct ints bfs, struct ints ewss, struct rgraph evs,
+    struct graph efs,
+    struct rgraph* pfvs2, struct xs* pxs2)
+{
+  struct ints fos = ints_exscan(bfs);
+  struct ints eos = ints_exscan(ewss);
+  int nsf = fos.i[bfs.n];
+  int nse = eos.i[ewss.n];
+  struct xs xs2 = xs_new(xs.n + nse);
+  for (int i = 0; i < xs.n; ++i)
+    xs2.x[i] = xs.x[i];
+  for (int i = 0; i < ewss.n; ++i)
+    if (ewss.i[i]) {
+      int ev[2];
+      rgraph_get(evs, i, ev);
+      struct x ex[2];
+      xs_get(xs, ev, 2, ex);
+      struct x mid = x_avg(ex[0], ex[1]);
+      xs2.x[xs.n + eos.i[i]] = mid;
+    }
+  *pxs2 = xs2;
+  struct rgraph fvs2 = rgraph_new(fvs.nverts + nsf, 3);
+  for (int i = 0; i < bfs.n; ++i)
+    if (!bfs.i[i]) {
+      int fv[3];
+      rgraph_get(fvs, i, fv);
+      rgraph_set(fvs2, i, fv);
+    }
+  struct adj ef = adj_new_graph(efs);
+  for (int i = 0; i < ewss.n; ++i)
+    if (ewss.i[i]) {
+      int ev[2];
+      rgraph_get(evs, i, ev);
+      graph_get(efs, i, &ef);
+      int sv = ewss.n + eos.i[i];
+      for (int j = 0; j < ef.n; ++j) {
+        int f = ef.e[j];
+        int sf[2];
+        sf[0] = f;
+        sf[1] = fvs.nverts + fos.i[f];
+        int fv[3];
+        for (int k = 0; k < 2; ++k) {
+          rgraph_get(fvs, f, fv);
+          for (int l = 0; l < 3; ++l)
+            if (fv[l] == ev[k])
+              fv[l] = sv;
+          rgraph_set(fvs2, sf[k], fv);
+        }
+      }
+    }
+  adj_free(ef);
+  *pfvs2 = fvs2;
+}
+
 void refine(struct rgraph fvs, struct xs xs, struct ss dss,
     struct rgraph* fvs2, struct xs* xs2)
 {
