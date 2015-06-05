@@ -25,6 +25,12 @@ int main()
   struct rgraph fvs2;
   struct xs xs2;
   refine(fvs, xs, dss, &fvs2, &xs2);
+  printf("\nxs2:\n");
+  xs_print(xs2);
+  printf("\nfvs2:\n");
+  rgraph_print(fvs2);
+  rgraph_free(fvs2);
+  xs_free(xs2);
   ss_free(dss);
   xs_free(xs);
   rgraph_free(fvs);
