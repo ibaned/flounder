@@ -88,9 +88,15 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
       for (int j = 0; j < ee.n; ++j) {
         if (enss.i[ee.e[j]])
           continue;
+        assert(ee.e[j] != i);
         double oq = eqs.s[ee.e[j]];
-        if (oq >= q) /* todo: tiebreaker ? */
-          local_max = 0;
+        if (oq == q) {
+          if (ee.e[j] < i)
+            local_max = 0;
+        } else {
+          if (q < oq)
+            local_max = 0;
+        }
       }
       if (local_max)
         ewss.i[i] = 1;
