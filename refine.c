@@ -213,8 +213,9 @@ void refine(struct rgraph fvs, struct xs xs, struct ss dss,
   *pxs2 = xs2;
   struct rgraph fvs2 = split_faces(fvs, fwss, ewss, evs, efs, xs.n);
   *pfvs2 = fvs2;
+  ints_free(fwss);
   ints_free(ewss);
-  graph_free(efs);
   rgraph_free(evs);
+  graph_free(efs);
 }
 
