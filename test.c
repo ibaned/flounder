@@ -3,10 +3,17 @@
 #include "vtk.h"
 #include <stdio.h>
 
-double size_fun(struct x x)
+double linear(struct x x)
 {
-  (void)x;
-  return 1e-4 + (5e-3) * x.x[0];
+  return 1e-5 + (1e-3) * x.x[0];
+}
+
+double ring(struct x x)
+{
+  static struct x const c = {{.5,.5}};
+  double r = x_dist(x, c);
+  double d = 4 * fabs(r - .25);
+  return 1e-5 + d * 1e-3;
 }
 
 int main()
@@ -25,7 +32,7 @@ int main()
   struct xs xs = xs_new_from_dat(4, x_dat);
   int done = 0;
   while (!done) {
-    struct ss dss = gen_size_field(fvs, xs, size_fun);
+    struct ss dss = gen_size_field(fvs, xs, ring);
     struct rgraph fvs2;
     struct xs xs2;
     refine(fvs, xs, dss, &fvs2, &xs2);
