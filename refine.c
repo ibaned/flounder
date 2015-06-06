@@ -66,13 +66,13 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
   struct ints enss = ints_new(ecss.n);
   ints_zero(enss);
   struct adj ee = adj_new(ees.max_deg);
+  for (int i = 0; i < ecss.n; ++i)
+    enss.i[i] = !ecss.i[i];
   int done = 0;
   int iter;
   for (iter = 0; !done; ++iter) {
     done = 1;
     for (int i = 0; i < ecss.n; ++i) {
-      if (!ecss.i[i])
-        continue;
       if (ewss.i[i])
         continue;
       if (enss.i[i])
@@ -106,11 +106,27 @@ next_edge:
   return ewss;
 }
 
+static struct ints mark_split_faces(struct ints ewss, struct rgraph fes)
+{
+  struct ints fwss = ints_new(fes.nverts);
+  struct adj fe = adj_new_rgraph(fes);
+  for (int i = 0; i < fes.nverts; ++i) {
+    fwss.i[i] = 0;
+    rgraph_get(fes, i, fe.e);
+    for (int j = 0; j < fe.n; ++j)
+      if (ewss.i[fe.e[j]])
+        fwss.i[i] = 1;
+  }
+  adj_free(fe);
+  return fwss;
+}
+
 static struct xs split_edges(struct xs xs,
     struct ints ewss, struct rgraph evs)
 {
   struct ints eos = ints_exscan(ewss);
   int nse = eos.i[ewss.n];
+  printf("xs.n = %d, nse = %d\n", xs.n, nse);
   struct xs xs2 = xs_new(xs.n + nse);
   for (int i = 0; i < xs.n; ++i)
     xs2.x[i] = xs.x[i];
@@ -118,6 +134,7 @@ static struct xs split_edges(struct xs xs,
     if (ewss.i[i]) {
       int ev[2];
       rgraph_get(evs, i, ev);
+      printf("split edge %d (%d,%d)\n", i, ev[0], ev[1]);
       struct x ex[2];
       xs_get(xs, ev, 2, ex);
       struct x mid = x_avg(ex[0], ex[1]);
@@ -128,18 +145,24 @@ static struct xs split_edges(struct xs xs,
 }
 
 static struct rgraph split_faces(struct rgraph fvs,
-    struct ints bfs, struct ints ewss, struct rgraph evs,
+    struct ints fwss, struct ints ewss, struct rgraph evs,
     struct graph efs, int nv)
 {
-  struct ints fos = ints_exscan(bfs);
+  struct ints fos = ints_exscan(fwss);
   struct ints eos = ints_exscan(ewss);
-  int nsf = fos.i[bfs.n];
+  printf("\nfwss\n");
+  ints_print(fwss);
+  printf("\nfos\n");
+  ints_print(fos);
+  int nsf = fos.i[fwss.n];
+  printf("fvs.nverts = %d, nsf = %d\n", fvs.nverts, nsf);
   struct rgraph fvs2 = rgraph_new(fvs.nverts + nsf, 3);
-  for (int i = 0; i < bfs.n; ++i)
-    if (!bfs.i[i]) {
+  for (int i = 0; i < fwss.n; ++i)
+    if (!fwss.i[i]) {
       int fv[3];
       rgraph_get(fvs, i, fv);
       rgraph_set(fvs2, i, fv);
+      printf("copy rgraph_set(%d)\n", i);
     }
   struct adj ef = adj_new_graph(efs);
   for (int i = 0; i < ewss.n; ++i)
@@ -160,6 +183,7 @@ static struct rgraph split_faces(struct rgraph fvs,
             if (fv[l] == ev[k])
               fv[l] = sv;
           rgraph_set(fvs2, sf[k], fv);
+          printf("split rgraph_set(%d)\n", sf[k]);
         }
       }
     }
@@ -185,19 +209,20 @@ void refine(struct rgraph fvs, struct xs xs, struct ss dss,
   struct ints bfs = ss_gt(as, dss);
   ss_free(as);
   struct ints ecss = mark_fes(efs, bfs);
+  ints_free(bfs);
   struct ss eqs = compute_split_quals(ecss, evs, efs, fvs, xs);
   struct graph ees = graph_rgraph_transit(efs, fes);
-  rgraph_free(fes);
   struct ints ewss = compute_best_indset(ecss, ees, eqs);
   graph_free(ees);
   ss_free(eqs);
   ints_free(ecss);
+  struct ints fwss = mark_split_faces(ewss, fes);
+  rgraph_free(fes);
   struct xs xs2 = split_edges(xs, ewss, evs);
   *pxs2 = xs2;
-  struct rgraph fvs2 = split_faces(fvs, bfs, ewss, evs, efs, xs.n);
+  struct rgraph fvs2 = split_faces(fvs, fwss, ewss, evs, efs, xs.n);
   *pfvs2 = fvs2;
   ints_free(ewss);
-  ints_free(bfs);
   graph_free(efs);
   rgraph_free(evs);
 }
