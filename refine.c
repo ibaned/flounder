@@ -126,7 +126,6 @@ static struct xs split_edges(struct xs xs,
 {
   struct ints eos = ints_exscan(ewss);
   int nse = eos.i[ewss.n];
-  printf("xs.n = %d, nse = %d\n", xs.n, nse);
   struct xs xs2 = xs_new(xs.n + nse);
   for (int i = 0; i < xs.n; ++i)
     xs2.x[i] = xs.x[i];
@@ -134,7 +133,6 @@ static struct xs split_edges(struct xs xs,
     if (ewss.i[i]) {
       int ev[2];
       rgraph_get(evs, i, ev);
-      printf("split edge %d (%d,%d)\n", i, ev[0], ev[1]);
       struct x ex[2];
       xs_get(xs, ev, 2, ex);
       struct x mid = x_avg(ex[0], ex[1]);
@@ -150,19 +148,13 @@ static struct rgraph split_faces(struct rgraph fvs,
 {
   struct ints fos = ints_exscan(fwss);
   struct ints eos = ints_exscan(ewss);
-  printf("\nfwss\n");
-  ints_print(fwss);
-  printf("\nfos\n");
-  ints_print(fos);
   int nsf = fos.i[fwss.n];
-  printf("fvs.nverts = %d, nsf = %d\n", fvs.nverts, nsf);
   struct rgraph fvs2 = rgraph_new(fvs.nverts + nsf, 3);
   for (int i = 0; i < fwss.n; ++i)
     if (!fwss.i[i]) {
       int fv[3];
       rgraph_get(fvs, i, fv);
       rgraph_set(fvs2, i, fv);
-      printf("copy rgraph_set(%d)\n", i);
     }
   struct adj ef = adj_new_graph(efs);
   for (int i = 0; i < ewss.n; ++i)
@@ -183,7 +175,6 @@ static struct rgraph split_faces(struct rgraph fvs,
             if (fv[l] == ev[k])
               fv[l] = sv;
           rgraph_set(fvs2, sf[k], fv);
-          printf("split rgraph_set(%d)\n", sf[k]);
         }
       }
     }

@@ -24,7 +24,7 @@ int main()
   struct rgraph fvs = rgraph_new_from_dat(2, 3, fvs_dat);
   struct xs xs = xs_new_from_dat(4, x_dat);
   char buf[64];
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < 4; ++i) {
     printf("round %d\n", i );
     struct ss dss = gen_size_field(fvs, xs, size_fun);
     struct rgraph fvs2;
