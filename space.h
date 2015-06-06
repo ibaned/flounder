@@ -72,6 +72,12 @@ static inline double x_dot(struct x a, struct x b)
   return a.x[0] * b.x[0] + a.x[1] * b.x[1];
 }
 
+static inline double x_dist(struct x a, struct x b)
+{
+  struct x ab = x_sub(b, a);
+  return sqrt(x_dot(ab, ab));
+}
+
 static inline double fx_area(struct x const x[3])
 {
   return x_cross(x_sub(x[1], x[0]), x_sub(x[2], x[0])) / 2;
