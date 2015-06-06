@@ -67,7 +67,8 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
   ints_zero(enss);
   struct adj ee = adj_new(ees.max_deg);
   int done = 0;
-  for (int iter = 0; !done; ++iter) {
+  int iter;
+  for (iter = 0; !done; ++iter) {
     done = 1;
     for (int i = 0; i < ecss.n; ++i) {
       if (!ecss.i[i])
@@ -99,6 +100,7 @@ next_edge:
       continue;
     }
   }
+  printf("indset took %d iters\n", iter);
   adj_free(ee);
   ints_free(enss);
   return ewss;

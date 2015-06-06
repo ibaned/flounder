@@ -95,6 +95,14 @@ static inline double fx_qual(struct x const x[3])
   return (3.0 * 4.0 / sqrt(3.0)) * (a / s);
 }
 
+static inline struct x fx_center(struct x const x[3])
+{
+  struct x c;
+  c.x[0] = (x[0].x[0] + x[1].x[0] + x[2].x[0]) / 3;
+  c.x[1] = (x[0].x[1] + x[1].x[1] + x[2].x[1]) / 3;
+  return c;
+}
+
 static inline void xs_get(struct xs xs, int const v[], int nv, struct x x[])
 {
   for (int i = 0; i < nv; ++i)
