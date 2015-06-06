@@ -1,4 +1,5 @@
 #include "refine.h"
+#include "vtk.h"
 #include <stdio.h>
 
 int main()
@@ -28,6 +29,7 @@ int main()
   printf("\nxs2:\n");
   xs_print(xs2);
   printf("\nfvs2:\n");
+  write_vtk("out.vtk", fvs2, xs2);
   rgraph_print(fvs2);
   rgraph_free(fvs2);
   xs_free(xs2);
