@@ -6,7 +6,7 @@
 double size_fun(struct x x)
 {
   (void)x;
-  return 0.125;
+  return 0.05 + (.3) * x.x[0];
 }
 
 int main()
@@ -23,7 +23,7 @@ int main()
   };
   struct rgraph fvs = rgraph_new_from_dat(2, 3, fvs_dat);
   struct xs xs = xs_new_from_dat(4, x_dat);
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < 3; ++i) {
     printf("round %d\n", i );
     struct ss dss = gen_size_field(fvs, xs, size_fun);
     struct rgraph fvs2;
