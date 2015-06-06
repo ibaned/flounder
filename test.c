@@ -15,25 +15,20 @@ int main()
     {0,1}
   };
   struct rgraph fvs = rgraph_new_from_dat(2, 3, fvs_dat);
-  printf("\nfvs:\n");
-  rgraph_print(fvs);
   struct xs xs = xs_new_from_dat(4, x_dat);
-  printf("\nxs:\n");
-  xs_print(xs);
-  struct ss dss = ss_new_const(2, 0.25);
-  printf("\ndss:\n");
-  ss_print(dss);
-  struct rgraph fvs2;
-  struct xs xs2;
-  refine(fvs, xs, dss, &fvs2, &xs2);
-  printf("\nxs2:\n");
-  xs_print(xs2);
-  printf("\nfvs2:\n");
-  write_vtk("out.vtk", fvs2, xs2);
-  rgraph_print(fvs2);
-  rgraph_free(fvs2);
-  xs_free(xs2);
-  ss_free(dss);
+  for (int i = 0; i < 2; ++i) {
+    printf("round %d\n", i );
+    struct ss dss = ss_new_const(fvs.nverts, 0.125);
+    struct rgraph fvs2;
+    struct xs xs2;
+    refine(fvs, xs, dss, &fvs2, &xs2);
+    ss_free(dss);
+    rgraph_free(fvs);
+    xs_free(xs);
+    fvs = fvs2;
+    xs = xs2;
+  }
+  write_vtk("out.vtk", fvs, xs);
   xs_free(xs);
   rgraph_free(fvs);
   return 0;
