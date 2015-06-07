@@ -13,7 +13,7 @@ double ring(struct x x)
   static struct x const c = {{.5,.5}};
   double r = x_dist(x, c);
   double d = 4 * fabs(r - .25);
-  return 1e-5 + d * 1e-3;
+  return 5e-7 + d * 5e-5;
 }
 
 int main()
