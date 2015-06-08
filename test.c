@@ -1,3 +1,6 @@
+/* makes M_PI visible */
+#define _XOPEN_SOURCE 500
+#include <math.h>
 #include "refine.h"
 #include "size.h"
 #include "vtk.h"
@@ -15,6 +18,20 @@ double ring(struct x x)
   double r = x_dist(x, c);
   double d = 4 * fabs(r - .25);
   return 5e-7 + d * 5e-5;
+}
+
+double sinusoid(struct x x)
+{
+  double s = cos(x.x[0] * 8.0 * M_PI) / 4.0 + 1.0 / 2.0;
+  double d = fabs(x.x[1] - s);
+  return 1e-6 + d * 1e-4;
+}
+
+double gold_sinusoid(struct x x)
+{
+  double s = cos(x.x[0] * 8.0 * M_PI) / 4.0 + 1.0 / 2.0;
+  double d = fabs(x.x[1] - s);
+  return 1e-7 + d * 1e-5;
 }
 
 int main()
@@ -35,7 +52,7 @@ int main()
   int done = 0;
   double t0 = omp_get_wtime();
   while (!done) {
-    struct ss dss = gen_size_field(fvs, xs, ring);
+    struct ss dss = gen_size_field(fvs, xs, gold_sinusoid);
     struct rgraph fvs2;
     struct xs xs2;
     refine(fvs, xs, dss, &fvs2, &xs2);
@@ -48,8 +65,9 @@ int main()
     xs = xs2;
   }
   double t1 = omp_get_wtime();
+  printf("num faces %d\n", fvs.nverts);
   printf("total runtime %f seconds\n", t1 - t0);
-  write_vtk("out.vtk", fvs, xs);
+/*write_vtk("out.vtk", fvs, xs);*/
   xs_free(xs);
   rgraph_free(fvs);
   return 0;

@@ -118,7 +118,6 @@ next_edge:
       continue;
     }
   }
-  printf("indset took %d iters\n", iter);
   adj_free(ee);
   ints_free(enss);
   return ewss;
