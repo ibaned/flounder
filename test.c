@@ -29,9 +29,12 @@ int main()
     {1,1},
     {0,1}
   };
+  omp_set_dynamic(0);
+  printf("%d OpenMP threads\n", omp_get_num_threads());
   struct rgraph fvs = rgraph_new_from_dat(2, 3, fvs_dat);
   struct xs xs = xs_new_from_dat(4, x_dat);
   int done = 0;
+  double t0 = omp_get_wtime();
   while (!done) {
     struct ss dss = gen_size_field(fvs, xs, ring);
     struct rgraph fvs2;
@@ -45,6 +48,8 @@ int main()
     fvs = fvs2;
     xs = xs2;
   }
+  double t1 = omp_get_wtime();
+  printf("total runtime %f seconds\n", t1 - t0);
   write_vtk("out.vtk", fvs, xs);
   xs_free(xs);
   rgraph_free(fvs);
