@@ -19,6 +19,7 @@ double ring(struct x x)
 
 int main()
 {
+  omp_set_dynamic(0);
   int const fvs_dat[6] = {
     0,1,2,
     2,3,0
@@ -29,8 +30,6 @@ int main()
     {1,1},
     {0,1}
   };
-  omp_set_dynamic(0);
-  printf("%d OpenMP threads\n", omp_get_num_threads());
   struct rgraph fvs = rgraph_new_from_dat(2, 3, fvs_dat);
   struct xs xs = xs_new_from_dat(4, x_dat);
   int done = 0;
