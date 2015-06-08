@@ -1,3 +1,4 @@
+CC=gcc
 CFLAGS=-fopenmp -std=c99 -g -O1 -fno-omit-frame-pointer
 LDFLAGS=-fopenmp -lm
 
