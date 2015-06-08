@@ -34,34 +34,48 @@ struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
 {
   struct graph_spec s = graph_spec_new(g.nverts);
   ints_zero(s.deg);
-  struct adj ga = adj_new_graph(g);
-  struct adj ra = adj_new_rgraph(rg);
-  struct adj ta = adj_new(ga.c * ra.c);
-  for (int i = 0; i < g.nverts; ++i) {
-    graph_get(g, i, &ga);
-    rgraph_get(rg, ga.e[0], ta.e);
-    ta.n = rg.degree;
-    for (int j = 1; j < ga.n; ++j) {
-      rgraph_get(rg, ga.e[j], ra.e);
-      adj_unite(&ta, ra);
+  #pragma omp parallel
+  {
+    struct adj ga = adj_new_graph(g);
+    struct adj ra = adj_new_rgraph(rg);
+    struct adj ta = adj_new(ga.c * ra.c);
+    #pragma omp for
+    for (int i = 0; i < g.nverts; ++i) {
+      graph_get(g, i, &ga);
+      rgraph_get(rg, ga.e[0], ta.e);
+      ta.n = rg.degree;
+      for (int j = 1; j < ga.n; ++j) {
+        rgraph_get(rg, ga.e[j], ra.e);
+        adj_unite(&ta, ra);
+      }
+      s.deg.i[i] = ta.n - 1;
     }
-    s.deg.i[i] = ta.n - 1;
+    adj_free(ga);
+    adj_free(ra);
+    adj_free(ta);
   }
   struct graph tg = graph_new(s);
-  for (int i = 0; i < g.nverts; ++i) {
-    graph_get(g, i, &ga);
-    rgraph_get(rg, ga.e[0], ta.e);
-    ta.n = rg.degree;
-    for (int j = 1; j < ga.n; ++j) {
-      rgraph_get(rg, ga.e[j], ra.e);
-      adj_unite(&ta, ra);
+  #pragma omp parallel
+  {
+    struct adj ga = adj_new_graph(g);
+    struct adj ra = adj_new_rgraph(rg);
+    struct adj ta = adj_new(ga.c * ra.c);
+    #pragma omp for
+    for (int i = 0; i < g.nverts; ++i) {
+      graph_get(g, i, &ga);
+      rgraph_get(rg, ga.e[0], ta.e);
+      ta.n = rg.degree;
+      for (int j = 1; j < ga.n; ++j) {
+        rgraph_get(rg, ga.e[j], ra.e);
+        adj_unite(&ta, ra);
+      }
+      adj_remove(&ta, i);
+      graph_set(tg, i, ta);
     }
-    adj_remove(&ta, i);
-    graph_set(tg, i, ta);
+    adj_free(ga);
+    adj_free(ra);
+    adj_free(ta);
   }
-  adj_free(ga);
-  adj_free(ra);
-  adj_free(ta);
   return tg;
 }
 
