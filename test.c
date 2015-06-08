@@ -29,7 +29,6 @@ int main()
     {1,1},
     {0,1}
   };
-  omp_set_num_threads();
   struct rgraph fvs = rgraph_new_from_dat(2, 3, fvs_dat);
   struct xs xs = xs_new_from_dat(4, x_dat);
   int done = 0;
