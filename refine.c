@@ -4,6 +4,18 @@
 #include <float.h>
 #include <stdio.h>
 
+static struct ints mark_fes(struct graph efs, struct ints bfs) __attribute__((noinline));
+static struct ss compute_split_quals(struct ints ecss, struct rgraph evs,
+    struct graph efs, struct rgraph fvs, struct xs xs) __attribute__((noinline));
+static struct ints compute_best_indset(struct ints ecss, struct graph ees,
+    struct ss eqs) __attribute__((noinline));
+static struct ints mark_split_faces(struct ints ewss, struct rgraph fes) __attribute__((noinline));
+static struct xs split_edges(struct xs xs,
+    struct ints ewss, struct rgraph evs) __attribute__((noinline));
+static struct rgraph split_faces(struct rgraph fvs,
+    struct ints fwss, struct ints ewss, struct rgraph evs,
+    struct graph efs, int nv) __attribute__((noinline));
+
 static struct ints mark_fes(struct graph efs, struct ints bfs)
 {
   struct ints ecss = ints_new(efs.nverts);

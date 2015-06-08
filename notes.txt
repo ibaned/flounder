@@ -1,0 +1,6 @@
+compute_fes and graph_rgraph_transit are dominating serial runtime,
+given that they use the adjacency set operations: intersect and unite.
+adding statistics collection to compute_fes shows that the
+average value of ve[k].n is 6 and its max value is 8.
+these are very small arrays, and we intend to take their
+intersection or union...
