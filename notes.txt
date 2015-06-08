@@ -4,3 +4,6 @@ adding statistics collection to compute_fes shows that the
 average value of ve[k].n is 6 and its max value is 8.
 these are very small arrays, and we intend to take their
 intersection or union...
+
+using "-O2" instead of "-O1 -fno-omit-frame-pointer" does not reduce
+runtime that much, as measured by omp_get_wtime on my i3 laptop
