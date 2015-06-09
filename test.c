@@ -52,7 +52,7 @@ int main()
   int done = 0;
   double t0 = omp_get_wtime();
   while (!done) {
-    struct ss dss = gen_size_field(fvs, xs, gold_sinusoid);
+    struct ss dss = gen_size_field(fvs, xs, linear);
     struct rgraph fvs2;
     struct xs xs2;
     refine(fvs, xs, dss, &fvs2, &xs2);
@@ -67,7 +67,7 @@ int main()
   double t1 = omp_get_wtime();
   printf("num faces %d\n", fvs.nverts);
   printf("total runtime %f seconds\n", t1 - t0);
-/*write_vtk("out.vtk", fvs, xs);*/
+  write_vtk("out.vtk", fvs, xs);
   xs_free(xs);
   rgraph_free(fvs);
   return 0;

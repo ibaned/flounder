@@ -7,43 +7,26 @@ struct graph rgraph_invert(struct rgraph rg)
   int nverts = rgraph_max_adj(rg) + 1;
   struct graph_spec s = graph_spec_new(nverts);
   ints_zero(s.deg);
-  #pragma omp parallel
-  {
-    struct adj a = adj_new_rgraph(rg);
-    a.n = rg.degree;
-    #pragma omp for
-    for (int i = 0; i < rg.nverts; ++i) {
-      rgraph_get(rg, i, a.e);
-      for (int j = 0; j < a.n; ++j) {
-        int* p = &(s.deg.i[a.e[j]]);
-        #pragma omp atomic update
-        ++(*p);
-      }
-    }
-    adj_free(a);
+  struct adj a = adj_new_rgraph(rg);
+  a.n = rg.degree;
+  for (int i = 0; i < rg.nverts; ++i) {
+    rgraph_get(rg, i, a.e);
+    for (int j = 0; j < a.n; ++j)
+      s.deg.i[a.e[j]]++;
   }
   struct graph g = graph_new(s);
   struct ints at = ints_new(nverts);
   ints_from_dat(at, g.off.i);
-  #pragma omp parallel
-  {
-    struct adj a = adj_new_rgraph(rg);
-    a.n = rg.degree;
-    #pragma omp for
-    for (int i = 0; i < rg.nverts; ++i) {
-      rgraph_get(rg, i, a.e);
-      for (int j = 0; j < a.n; ++j) {
-        int av = a.e[j];
-        int* p = &(at.i[av]);
-        int o;
-        #pragma omp atomic capture
-        o = (*p)++;
-        g.adj.i[o] = i;
-      }
+  for (int i = 0; i < rg.nverts; ++i) {
+    rgraph_get(rg, i, a.e);
+    for (int j = 0; j < a.n; ++j) {
+      int av = a.e[j];
+      g.adj.i[at.i[av]] = i;
+      at.i[av]++;
     }
-    adj_free(a);
   }
   ints_free(at);
+  adj_free(a);
   return g;
 }
 
