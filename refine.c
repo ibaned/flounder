@@ -171,35 +171,40 @@ static struct rgraph split_faces(struct rgraph fvs,
   struct ints eos = ints_exscan(ewss);
   int nsf = fos.i[fwss.n];
   struct rgraph fvs2 = rgraph_new(fvs.nverts + nsf, 3);
+  #pragma omp parallel for
   for (int i = 0; i < fwss.n; ++i)
     if (!fwss.i[i]) {
       int fv[3];
       rgraph_get(fvs, i, fv);
       rgraph_set(fvs2, i, fv);
     }
-  struct adj ef = adj_new_graph(efs);
-  for (int i = 0; i < ewss.n; ++i)
-    if (ewss.i[i]) {
-      int ev[2];
-      rgraph_get(evs, i, ev);
-      graph_get(efs, i, &ef);
-      int sv = nv + eos.i[i];
-      for (int j = 0; j < ef.n; ++j) {
-        int f = ef.e[j];
-        int sf[2];
-        sf[0] = f;
-        sf[1] = fvs.nverts + fos.i[f];
-        int fv[3];
-        for (int k = 0; k < 2; ++k) {
-          rgraph_get(fvs, f, fv);
-          for (int l = 0; l < 3; ++l)
-            if (fv[l] == ev[k])
-              fv[l] = sv;
-          rgraph_set(fvs2, sf[k], fv);
+  #pragma omp parallel
+  {
+    struct adj ef = adj_new_graph(efs);
+    #pragma omp for
+    for (int i = 0; i < ewss.n; ++i)
+      if (ewss.i[i]) {
+        int ev[2];
+        rgraph_get(evs, i, ev);
+        graph_get(efs, i, &ef);
+        int sv = nv + eos.i[i];
+        for (int j = 0; j < ef.n; ++j) {
+          int f = ef.e[j];
+          int sf[2];
+          sf[0] = f;
+          sf[1] = fvs.nverts + fos.i[f];
+          int fv[3];
+          for (int k = 0; k < 2; ++k) {
+            rgraph_get(fvs, f, fv);
+            for (int l = 0; l < 3; ++l)
+              if (fv[l] == ev[k])
+                fv[l] = sv;
+            rgraph_set(fvs2, sf[k], fv);
+          }
         }
       }
-    }
-  adj_free(ef);
+    adj_free(ef);
+  }
   ints_free(eos);
   ints_free(fos);
   return fvs2;
