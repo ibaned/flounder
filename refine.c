@@ -38,35 +38,39 @@ static struct ss compute_split_quals(struct ints ecss, struct rgraph evs,
     struct graph efs, struct rgraph fvs, struct xs xs)
 {
   struct ss eqs = ss_new(efs.nverts);
-  struct adj ef = adj_new(2);
-  for (int i = 0; i < ecss.n; ++i) {
-    if (!ecss.i[i])
-      continue;
-    int ev[2];
-    rgraph_get(evs, i, ev);
-    struct x ex[2];
-    xs_get(xs, ev, 2, ex);
-    struct x mid = x_avg(ex[0], ex[1]);
-    graph_get(efs, i, &ef);
-    double wq = DBL_MAX;
-    for (int j = 0; j < ef.n; ++j) {
-      int f = ef.e[j];
-      int fv[3];
-      rgraph_get(fvs, f, fv);
-      struct x fx[3];
-      for (int k = 0; k < 2; ++k) {
-        xs_get(xs, fv, 3, fx);
-        for (int l = 0; l < 3; ++l)
-          if (fv[l] == ev[k])
-            fx[l] = mid;
-        double q = fx_qual(fx);
-        if (q < wq)
-          wq = q;
+  #pragma omp parallel
+  {
+    struct adj ef = adj_new(2);
+    #pragma omp for
+    for (int i = 0; i < ecss.n; ++i) {
+      if (!ecss.i[i])
+        continue;
+      int ev[2];
+      rgraph_get(evs, i, ev);
+      struct x ex[2];
+      xs_get(xs, ev, 2, ex);
+      struct x mid = x_avg(ex[0], ex[1]);
+      graph_get(efs, i, &ef);
+      double wq = DBL_MAX;
+      for (int j = 0; j < ef.n; ++j) {
+        int f = ef.e[j];
+        int fv[3];
+        rgraph_get(fvs, f, fv);
+        struct x fx[3];
+        for (int k = 0; k < 2; ++k) {
+          xs_get(xs, fv, 3, fx);
+          for (int l = 0; l < 3; ++l)
+            if (fv[l] == ev[k])
+              fx[l] = mid;
+          double q = fx_qual(fx);
+          if (q < wq)
+            wq = q;
+        }
       }
+      eqs.s[i] = wq;
     }
-    eqs.s[i] = wq;
+    adj_free(ef);
   }
-  adj_free(ef);
   return eqs;
 }
 
