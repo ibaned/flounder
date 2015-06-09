@@ -18,9 +18,12 @@ void ints_free(struct ints is)
 struct ints ints_exscan(struct ints is)
 {
   struct ints o = ints_new(is.n + 1);
+  int a = 0;
   o.i[0] = 0;
-  for (int i = 0; i < is.n; ++i)
-    o.i[i + 1] = o.i[i] + is.i[i];
+  for (int i = 0; i < is.n; ++i) {
+    a += is.i[i];
+    o.i[i + 1] = a;
+  }
   return o;
 }
 
