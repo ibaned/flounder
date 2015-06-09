@@ -20,16 +20,20 @@ static struct ints mark_fes(struct graph efs, struct ints bfs)
 {
   struct ints ecss = ints_new(efs.nverts);
   ints_zero(ecss);
-  struct adj ef = adj_new(efs.max_deg);
-  for (int i = 0; i < efs.nverts; ++i) {
-    graph_get(efs, i, &ef);
-    for (int j = 0; j < ef.n; ++j)
-      if (bfs.i[ef.e[j]]) {
-        ecss.i[i] = 1;
-        break;
-      }
+  #pragma omp parallel
+  {
+    struct adj ef = adj_new(efs.max_deg);
+    #pragma omp for
+    for (int i = 0; i < efs.nverts; ++i) {
+      graph_get(efs, i, &ef);
+      for (int j = 0; j < ef.n; ++j)
+        if (bfs.i[ef.e[j]]) {
+          ecss.i[i] = 1;
+          break;
+        }
+    }
+    adj_free(ef);
   }
-  adj_free(ef);
   return ecss;
 }
 
