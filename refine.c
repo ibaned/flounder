@@ -20,7 +20,6 @@ static struct ints mark_fes(struct graph efs, struct ints bfs)
 {
   struct ints ecss = ints_new(efs.nverts);
   ints_zero(ecss);
-  int fe[3];
   struct adj ef = adj_new(efs.max_deg);
   for (int i = 0; i < efs.nverts; ++i) {
     graph_get(efs, i, &ef);
