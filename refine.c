@@ -130,15 +130,19 @@ next_edge:
 static struct ints mark_split_faces(struct ints ewss, struct rgraph fes)
 {
   struct ints fwss = ints_new(fes.nverts);
-  struct adj fe = adj_new_rgraph(fes);
-  for (int i = 0; i < fes.nverts; ++i) {
-    fwss.i[i] = 0;
-    rgraph_get(fes, i, fe.e);
-    for (int j = 0; j < fe.n; ++j)
-      if (ewss.i[fe.e[j]])
-        fwss.i[i] = 1;
+  #pragma omp parallel
+  {
+    struct adj fe = adj_new_rgraph(fes);
+    #pragma omp for
+    for (int i = 0; i < fes.nverts; ++i) {
+      fwss.i[i] = 0;
+      rgraph_get(fes, i, fe.e);
+      for (int j = 0; j < fe.n; ++j)
+        if (ewss.i[fe.e[j]])
+          fwss.i[i] = 1;
+    }
+    adj_free(fe);
   }
-  adj_free(fe);
   return fwss;
 }
 
