@@ -4,6 +4,7 @@ struct ss gen_size_field(struct rgraph fvs, struct xs xs,
     double (*fun)(struct x))
 {
   struct ss dss = ss_new(fvs.nverts);
+  #pragma omp parallel for
   for (int i = 0; i < dss.n; ++i) {
     int fv[3];
     rgraph_get(fvs, i, fv);
