@@ -72,6 +72,7 @@ struct ints ss_gt(struct ss a, struct ss b)
 struct ss compute_areas(struct xs xs, struct rgraph fvs)
 {
   struct ss as = ss_new(fvs.nverts);
+  #pragma omp parallel for
   for (int i = 0; i < fvs.nverts; ++i) {
     int fv[3];
     rgraph_get(fvs, i, fv);
