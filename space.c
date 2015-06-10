@@ -64,6 +64,7 @@ void ss_print(struct ss ss)
 struct ints ss_gt(struct ss a, struct ss b)
 {
   struct ints gts = ints_new(a.n);
+  #pragma omp parallel for
   for (int i = 0; i < a.n; ++i)
     gts.i[i] = (a.s[i] > b.s[i]);
   return gts;
