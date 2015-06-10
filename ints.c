@@ -80,6 +80,7 @@ void ints_print(struct ints is)
 
 void ints_zero(struct ints is)
 {
+  #pragma omp parallel for
   for (int i = 0; i < is.n; ++i)
     is.i[i] = 0;
 }
