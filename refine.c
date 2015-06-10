@@ -83,49 +83,60 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
   enum { WONT_SPLIT = 0, WILL_SPLIT = 1, COULD_SPLIT = 2 };
   struct ints ewss = ints_new(ecss.n);
   struct ints ewss_old = ints_new(ecss.n);
+  #pragma omp parallel for
   for (int i = 0; i < ecss.n; ++i) {
     if (ecss.i[i])
       ewss.i[i] = COULD_SPLIT;
     else
       ewss.i[i] = WONT_SPLIT;
   }
-  struct adj ee = adj_new(ees.max_deg);
   int done = 0;
   int iter;
   for (iter = 0; !done; ++iter) {
-    done = 1;
     ints_from_dat(ewss_old, ewss.i);
-    for (int i = 0; i < ecss.n; ++i) {
-      if (ewss_old.i[i] != COULD_SPLIT)
-        continue;
-      double q = eqs.s[i];
-      graph_get(ees, i, &ee);
-      for (int j = 0; j < ee.n; ++j)
-        if (ewss_old.i[ee.e[j]] == WILL_SPLIT)
-          ewss.i[i] = WONT_SPLIT;
-      if (ewss.i[i] != COULD_SPLIT)
-        continue;
-      int local_max = 1;
-      for (int j = 0; j < ee.n; ++j) {
-        if (ewss_old.i[ee.e[j]] == WONT_SPLIT)
+    done = 1;
+    #pragma omp parallel
+    {
+      int thread_done = 1;
+      struct adj ee = adj_new(ees.max_deg);
+      #pragma omp for
+      for (int i = 0; i < ecss.n; ++i) {
+        if (ewss_old.i[i] != COULD_SPLIT)
           continue;
-        assert(ee.e[j] != i);
-        double oq = eqs.s[ee.e[j]];
-        if (oq == q) {
-          if (ee.e[j] < i)
-            local_max = 0;
-        } else {
-          if (q < oq)
-            local_max = 0;
+        double q = eqs.s[i];
+        graph_get(ees, i, &ee);
+        for (int j = 0; j < ee.n; ++j)
+          if (ewss_old.i[ee.e[j]] == WILL_SPLIT)
+            ewss.i[i] = WONT_SPLIT;
+        if (ewss.i[i] != COULD_SPLIT)
+          continue;
+        int local_max = 1;
+        for (int j = 0; j < ee.n; ++j) {
+          if (ewss_old.i[ee.e[j]] == WONT_SPLIT)
+            continue;
+          assert(ee.e[j] != i);
+          double oq = eqs.s[ee.e[j]];
+          if (oq == q) {
+            if (ee.e[j] < i)
+              local_max = 0;
+          } else {
+            if (q < oq)
+              local_max = 0;
+          }
         }
+        if (local_max)
+          ewss.i[i] = WILL_SPLIT;
+        else
+          thread_done = 0;
       }
-      if (local_max)
-        ewss.i[i] = WILL_SPLIT;
-      else
+      adj_free(ee);
+      if (!thread_done)
+        /* doesn't have to be atomic, "done" is just
+           the min of all "thread_done" copies */
+        #pragma omp atomic write
         done = 0;
     }
   }
-  adj_free(ee);
   ints_free(ewss_old);
   return ewss;
 }
