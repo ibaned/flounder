@@ -166,8 +166,10 @@ static struct xs split_edges(struct xs xs,
   struct ints eos = ints_exscan(ewss);
   int nse = eos.i[ewss.n];
   struct xs xs2 = xs_new(xs.n + nse);
+  #pragma omp parallel for
   for (int i = 0; i < xs.n; ++i)
     xs2.x[i] = xs.x[i];
+  #pragma omp parallel for
   for (int i = 0; i < ewss.n; ++i)
     if (ewss.i[i]) {
       int ev[2];
