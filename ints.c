@@ -30,9 +30,19 @@ struct ints ints_exscan(struct ints is)
 int ints_max(struct ints is)
 {
   int max = is.i[0];
-  for (int i = 1; i < is.n; ++i)
-    if (is.i[i] > max)
-      max = is.i[i];
+  #pragma omp parallel
+  {
+    int thread_max = is.i[0];
+    #pragma omp for
+    for (int i = 1; i < is.n; ++i)
+      if (is.i[i] > thread_max)
+        thread_max = is.i[i];
+    #pragma omp critical
+    {
+      if (thread_max > max)
+        max = thread_max;
+    }
+  }
   return max;
 }
 
