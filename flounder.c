@@ -49,7 +49,7 @@ int main()
   struct xs xs = xs_new_from_dat(4, x_dat);
   int done = 0;
   while (!done) {
-    struct ss dss = gen_size_field(fvs, xs, gold_sinusoid);
+    struct ss dss = gen_size_field(fvs, xs, sinusoid);
     struct rgraph fvs2;
     struct xs xs2;
     refine(fvs, xs, dss, &fvs2, &xs2);
@@ -62,7 +62,7 @@ int main()
     xs = xs2;
   }
   printf("num faces %d\n", fvs.nverts);
-/*write_vtk("out.vtk", fvs, xs);*/
+  write_vtk("out.vtk", fvs, xs);
   xs_free(xs);
   rgraph_free(fvs);
   return 0;
