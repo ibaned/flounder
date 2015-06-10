@@ -61,6 +61,7 @@ void ints_zero(struct ints is)
 
 void ints_from_dat(struct ints is, int const dat[])
 {
+  #pragma omp parallel for
   for (int i = 0; i < is.n; ++i)
     is.i[i] = dat[i];
 }
