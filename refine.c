@@ -80,32 +80,34 @@ static struct ss compute_split_quals(struct ints ecss, struct rgraph evs,
 static struct ints compute_best_indset(struct ints ecss, struct graph ees,
     struct ss eqs)
 {
+  enum { WONT_SPLIT = 0, WILL_SPLIT = 1, COULD_SPLIT = 2 };
   struct ints ewss = ints_new(ecss.n);
-  ints_zero(ewss);
-  struct ints enss = ints_new(ecss.n);
-  ints_zero(enss);
+  struct ints ewss_old = ints_new(ecss.n);
+  for (int i = 0; i < ecss.n; ++i) {
+    if (ecss.i[i])
+      ewss.i[i] = COULD_SPLIT;
+    else
+      ewss.i[i] = WONT_SPLIT;
+  }
   struct adj ee = adj_new(ees.max_deg);
-  for (int i = 0; i < ecss.n; ++i)
-    enss.i[i] = !ecss.i[i];
   int done = 0;
   int iter;
   for (iter = 0; !done; ++iter) {
     done = 1;
+    ints_from_dat(ewss_old, ewss.i);
     for (int i = 0; i < ecss.n; ++i) {
-      if (ewss.i[i])
-        continue;
-      if (enss.i[i])
+      if (ewss_old.i[i] != COULD_SPLIT)
         continue;
       double q = eqs.s[i];
       graph_get(ees, i, &ee);
       for (int j = 0; j < ee.n; ++j)
-        if (ewss.i[ee.e[j]]) {
-          enss.i[i] = 1;
-          goto next_edge;
-        }
+        if (ewss_old.i[ee.e[j]] == WILL_SPLIT)
+          ewss.i[i] = WONT_SPLIT;
+      if (ewss.i[i] != COULD_SPLIT)
+        continue;
       int local_max = 1;
       for (int j = 0; j < ee.n; ++j) {
-        if (enss.i[ee.e[j]])
+        if (ewss_old.i[ee.e[j]] == WONT_SPLIT)
           continue;
         assert(ee.e[j] != i);
         double oq = eqs.s[ee.e[j]];
@@ -118,15 +120,13 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
         }
       }
       if (local_max)
-        ewss.i[i] = 1;
+        ewss.i[i] = WILL_SPLIT;
       else
         done = 0;
-next_edge:
-      continue;
     }
   }
   adj_free(ee);
-  ints_free(enss);
+  ints_free(ewss_old);
   return ewss;
 }
 
