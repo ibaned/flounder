@@ -1,6 +1,7 @@
 #include "ints.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <omp.h>
 
 struct ints ints_new(int n)
 {
@@ -17,13 +18,37 @@ void ints_free(struct ints is)
 
 struct ints ints_exscan(struct ints is)
 {
-  struct ints o = ints_new(is.n + 1);
-  int a = 0;
-  o.i[0] = 0;
-  for (int i = 0; i < is.n; ++i) {
-    a += is.i[i];
-    o.i[i + 1] = a;
+  int nthreads = omp_get_max_threads();
+  int* thread_sums = malloc(sizeof(int) * nthreads);
+  thread_sums[0] = 0;
+  #pragma omp parallel
+  {
+    int thread_sum = 0;
+    #pragma omp for schedule(static)
+    for (int i = 0; i < is.n; ++i)
+      thread_sum += is.i[i];
+    thread_sums[omp_get_thread_num()] = thread_sum;
   }
+  {
+    int accum = 0;
+    for (int i = 0; i < nthreads; ++i) {
+      int sum = thread_sums[i];
+      thread_sums[i] = accum;
+      accum += sum;
+    }
+  }
+  struct ints o = ints_new(is.n + 1);
+  o.i[0] = 0;
+  #pragma omp parallel
+  {
+    int accum = thread_sums[omp_get_thread_num()];
+    #pragma omp for schedule(static)
+    for (int i = 0; i < is.n; ++i) {
+      accum += is.i[i];
+      o.i[i + 1] = accum;
+    }
+  }
+  free(thread_sums);
   return o;
 }
 
