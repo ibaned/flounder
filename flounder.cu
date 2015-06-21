@@ -1,5 +1,4 @@
 /* makes M_PI visible */
-#define _XOPEN_SOURCE 500
 #include <math.h>
 #include "refine.h"
 #include "size.h"
