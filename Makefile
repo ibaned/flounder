@@ -1,11 +1,10 @@
-CC=gcc
-CFLAGS=-std=c99 -g -O2 -fno-omit-frame-pointer
-LDFLAGS=-lm
+CC=nvcc
 
 flounder: flounder.o refine.o adj_ops.o graph_ops.o graph.o rgraph.o adj.o ints.o space.o vtk.o size.o
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-%.s: %.c
-	$(CC) $(CFLAGS) -S -o $@ $^
+%.o: %.cu
+	$(CC) $(CFLAGS) -c -o $@ $^
 
 %.dis: %.o
 	objdump --source $^ > $@
