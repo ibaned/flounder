@@ -6,7 +6,7 @@ struct xs xs_new(int n)
 {
   struct xs xs;
   xs.n = n;
-  xs.x = malloc(sizeof(struct x) * n);
+  xs.x = (struct x*) malloc(sizeof(struct x) * n);
   return xs;
 }
 
@@ -37,7 +37,7 @@ struct ss ss_new(int n)
 {
   struct ss ss;
   ss.n = n;
-  ss.s = malloc(sizeof(double) * n);
+  ss.s = (double*) malloc(sizeof(double) * n);
   return ss;
 }
 

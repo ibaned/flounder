@@ -7,7 +7,7 @@ struct adj adj_new(int c)
   struct adj a;
   a.n = 0;
   a.c = c;
-  a.e = malloc(sizeof(int) * c);
+  a.e = (int*) malloc(sizeof(int) * c);
   return a;
 }
 

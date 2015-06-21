@@ -6,7 +6,7 @@ struct ints ints_new(int n)
 {
   struct ints is;
   is.n = n;
-  is.i = malloc(sizeof(int) * n);
+  is.i = (int*) malloc(sizeof(int) * n);
   return is;
 }
 
