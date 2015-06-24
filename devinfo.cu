@@ -33,7 +33,7 @@ static void print_device_prop(struct cudaDeviceProp* p)
   printf("SM count %d\n", p->multiProcessorCount);
   printf("timeout enabled %d\n", p->kernelExecTimeoutEnabled);
   printf("\"integrated\" with memory %d\n", p->integrated);
-  printf("can map host memory %p\n", p->canMapHostMemory);
+  printf("can map host memory %d\n", p->canMapHostMemory);
   printf("compute mode: ");
   if (p->computeMode == cudaComputeModeDefault)
     printf("device not restricted and multiple CPU threads can use it\n");
