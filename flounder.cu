@@ -48,7 +48,7 @@ int main()
   struct xs xs = xs_new_from_dat(4, x_dat);
   int done = 0;
   while (!done) {
-    struct ss dss = gen_size_field(fvs, xs, gold_sinusoid);
+    struct ss dss = gen_size_field(fvs, xs, linear);
     struct rgraph fvs2;
     struct xs xs2;
     refine(fvs, xs, dss, &fvs2, &xs2);

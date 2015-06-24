@@ -1,0 +1,39 @@
+4 devices, using #0
+name "Tesla K40m"
+total global memory 12079136768 bytes
+shared memory per block 49152 bytes
+registers per block 65536
+warp size 32
+memory pitch 2147483647
+max threads per block 1024
+max threads dim (1024,1024,64)
+max grid size (2147483647,65535,65535)
+peak clock rate 745000kHz
+total const mem 65536
+compute capability 3.5 (Kepler)
+supports concurrent memcpy+compute 1
+SM count 15
+timeout enabled 0
+"integrated" with memory 0
+can map host memory 0x1
+compute mode: device not restricted and multiple CPU threads can use it
+supports concurrent kernels 1
+ECC enabled 1
+PCI bus ID 2
+PCI device ID 0
+PCI domain ID 0
+async engine count 2
+supports unified addressing 1
+peak memory clock rate 3004000kHz
+memory bus width 384 bits
+L2 cache size 1572864 bytes
+max threads per SM 2048
+supports stream priorities 1
+supports global L1 cache 1
+supports local L1 cache 1
+shared mem per SM 49152 bytes
+registers per SM 65536
+is multi GPU board 0
+multi GPU board group ID 0
+GPU thread stack size (bytes) 1024
+malloc heap size (bytes) 8388608
