@@ -6,13 +6,13 @@ struct xs xs_new(int n)
 {
   struct xs xs;
   xs.n = n;
-  xs.x = (struct x*) malloc(sizeof(struct x) * n);
+  cudaMalloc(&xs.x, sizeof(struct x) * n);
   return xs;
 }
 
 void xs_free(struct xs xs)
 {
-  free(xs.x);
+  cudaFree(xs.x);
 }
 
 struct xs xs_new_from_dat(int n, struct x const dat[])
@@ -37,7 +37,7 @@ struct ss ss_new(int n)
 {
   struct ss ss;
   ss.n = n;
-  ss.s = (double*) malloc(sizeof(double) * n);
+  cudaMalloc(&ss.s, sizeof(double) * n);
   return ss;
 }
 
@@ -51,7 +51,7 @@ struct ss ss_new_const(int n, double v)
 
 void ss_free(struct ss ss)
 {
-  free(ss.s);
+  cudaFree(ss.s);
 }
 
 void ss_print(struct ss ss)

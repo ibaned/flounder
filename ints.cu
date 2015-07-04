@@ -6,13 +6,13 @@ struct ints ints_new(int n)
 {
   struct ints is;
   is.n = n;
-  is.i = (int*) malloc(sizeof(int) * n);
+  cudaMalloc(&is.i, sizeof(int) * n);
   return is;
 }
 
 void ints_free(struct ints is)
 {
-  free(is.i);
+  cudaFree(is.i);
 }
 
 struct ints ints_exscan(struct ints is)
