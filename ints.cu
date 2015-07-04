@@ -1,4 +1,5 @@
 #include "ints.h"
+#include "mycuda.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -43,10 +44,16 @@ void ints_print(struct ints is)
     printf("%d: %d\n", i, is.i[i]);
 }
 
+__global__ void ints_zero_0(struct ints is)
+{
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i < is.n)
+    is.i[i] = 0;
+}
+
 void ints_zero(struct ints is)
 {
-  for (int i = 0; i < is.n; ++i)
-    is.i[i] = 0;
+  CUDACALL(ints_zero_0, is.n, is);
 }
 
 void ints_from_dat(struct ints is, int const dat[])
