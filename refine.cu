@@ -2,7 +2,6 @@
 #include "graph_ops.h"
 #include "adj_ops.h"
 #include <float.h>
-#include <stdio.h>
 
 static struct ints mark_fes(struct graph efs, struct ints bfs) __attribute__((noinline));
 static struct ss compute_split_quals(struct ints ecss, struct rgraph evs,

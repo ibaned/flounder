@@ -24,12 +24,10 @@ struct ss {
 struct xs xs_new(int n);
 void xs_free(struct xs xs);
 struct xs xs_new_from_dat(int n, struct x const dat[]);
-void xs_print(struct xs xs);
 
 struct ss ss_new(int n);
 struct ss ss_new_const(int n, double v);
 void ss_free(struct ss ss);
-void ss_print(struct ss ss);
 
 struct ints ss_gt(struct ss a, struct ss b);
 

@@ -1,7 +1,5 @@
 #include "ints.h"
 #include "mycuda.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include <assert.h>
 #include <limits.h>
 #include <thrust/reduce.h>
@@ -36,13 +34,6 @@ int ints_max(struct ints is)
 {
   thrust::device_ptr<int> p(is.i);
   return thrust::reduce(p, p + is.n, INT_MIN, thrust::maximum<int>());
-}
-
-void ints_print(struct ints is)
-{
-  printf("ints (%d)\n", is.n);
-  for (int i = 0; i < is.n; ++i)
-    printf("%d: %d\n", i, is.i[i]);
 }
 
 void ints_zero(struct ints is)

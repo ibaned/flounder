@@ -1,5 +1,4 @@
 #include "graph.h"
-#include <stdio.h>
 
 int graph_nedges(struct graph const g)
 {
@@ -32,16 +31,4 @@ void graph_free(struct graph g)
 {
   ints_free(g.off);
   ints_free(g.adj);
-}
-
-void graph_print(struct graph g)
-{
-  printf("graph %d verts\n", g.nverts);
-  for (int i = 0; i < g.nverts; ++i) {
-    printf("%d:", i);
-    int o = g.off.i[i];
-    for (int j = 0; j < graph_deg(g, i); ++j)
-      printf(" %d", g.adj.i[o + j]);
-    printf("\n");
-  }
 }

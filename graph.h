@@ -52,6 +52,4 @@ static inline struct adj adj_new_graph(struct graph g)
   return adj_new(g.max_deg);
 }
 
-void graph_print(struct graph g);
-
 #endif

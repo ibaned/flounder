@@ -2,7 +2,7 @@ CC=nvcc
 
 all: flounder devinfo
 
-flounder: flounder.o refine.o adj_ops.o graph_ops.o graph.o rgraph.o adj.o ints.o space.o vtk.o size.o
+flounder: flounder.o refine.o adj_ops.o graph_ops.o graph.o rgraph.o ints.o space.o vtk.o size.o
 devinfo: devinfo.o
 
 %: %.o

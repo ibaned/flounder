@@ -1,6 +1,4 @@
 #include "graph_ops.h"
-#include <stdlib.h>
-#include <stdio.h>
 
 struct graph rgraph_invert(struct rgraph rg)
 {

@@ -1,5 +1,4 @@
 #include "rgraph.h"
-#include <stdio.h>
 
 struct rgraph rgraph_new(int nverts, int degree)
 {
@@ -25,15 +24,4 @@ struct rgraph rgraph_new_from_dat(int nverts, int degree, int const dat[])
   struct rgraph g = rgraph_new(nverts, degree);
   ints_from_host(g.adj, dat);
   return g;
-}
-
-void rgraph_print(struct rgraph g)
-{
-  printf("rgraph %d verts degree %d\n", g.nverts, g.degree);
-  for (int i = 0; i < g.nverts; ++i) {
-    printf("%d:", i);
-    for (int j = 0; j < g.degree; ++j)
-      printf(" %d", g.adj.i[i * g.degree + j]);
-    printf("\n");
-  }
 }

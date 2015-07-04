@@ -1,6 +1,4 @@
 #include "space.h"
-#include <stdlib.h>
-#include <stdio.h>
 
 struct xs xs_new(int n)
 {
@@ -24,15 +22,6 @@ struct xs xs_new_from_dat(int n, struct x const dat[])
   return xs;
 }
 
-void xs_print(struct xs xs)
-{
-  printf("coords (%d)\n", xs.n);
-  for (int i = 0; i < xs.n; ++i)
-    printf("%d: %f %f\n", i,
-        xs.x[i].x[0],
-        xs.x[i].x[1]);
-}
-
 struct ss ss_new(int n)
 {
   struct ss ss;
@@ -52,13 +41,6 @@ struct ss ss_new_const(int n, double v)
 void ss_free(struct ss ss)
 {
   cudaFree(ss.s);
-}
-
-void ss_print(struct ss ss)
-{
-  printf("scalars (%d)\n", ss.n);
-  for (int i = 0; i < ss.n; ++i)
-    printf("%d: %f\n", i, ss.s[i]);
 }
 
 struct ints ss_gt(struct ss a, struct ss b)

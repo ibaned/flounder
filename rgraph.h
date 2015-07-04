@@ -38,6 +38,5 @@ static inline struct adj adj_new_rgraph(struct rgraph g)
 
 int rgraph_max_adj(struct rgraph g);
 struct rgraph rgraph_new_from_dat(int nverts, int degree, int const dat[]);
-void rgraph_print(struct rgraph g);
 
 #endif
