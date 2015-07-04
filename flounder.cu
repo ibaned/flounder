@@ -1,8 +1,8 @@
 /* makes M_PI visible */
 #include <math.h>
-#include "refine.h"
-#include "size.h"
-#include "vtk.h"
+#include "refine.cuh"
+#include "size.cuh"
+#include "vtk.cuh"
 #include <stdio.h>
 
 __device__ double linear(struct x x)

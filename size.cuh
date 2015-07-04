@@ -1,8 +1,8 @@
 #ifndef SIZE_H
 #define SIZE_H
 
-#include "rgraph.h"
-#include "space.h"
+#include "rgraph.cuh"
+#include "space.cuh"
 
 typedef double (*sizefun)(struct x);
 

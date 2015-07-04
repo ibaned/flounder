@@ -1,8 +1,8 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include "adj.h"
-#include "ints.h"
+#include "adj.cuh"
+#include "ints.cuh"
 #include <assert.h>
 
 struct graph_spec {

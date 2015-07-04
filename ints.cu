@@ -1,5 +1,5 @@
-#include "ints.h"
-#include "mycuda.h"
+#include "ints.cuh"
+#include "mycuda.cuh"
 #include <assert.h>
 #include <limits.h>
 #include <thrust/reduce.h>

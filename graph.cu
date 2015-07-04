@@ -1,4 +1,4 @@
-#include "graph.h"
+#include "graph.cuh"
 
 int graph_nedges(struct graph const g)
 {

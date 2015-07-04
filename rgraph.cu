@@ -1,4 +1,4 @@
-#include "rgraph.h"
+#include "rgraph.cuh"
 
 struct rgraph rgraph_new(int nverts, int degree)
 {

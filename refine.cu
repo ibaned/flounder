@@ -1,7 +1,7 @@
-#include "refine.h"
-#include "graph_ops.h"
-#include "adj_ops.h"
-#include "mycuda.h"
+#include "refine.cuh"
+#include "graph_ops.cuh"
+#include "adj_ops.cuh"
+#include "mycuda.cuh"
 #include <float.h>
 
 static struct ints mark_fes(struct graph efs, struct ints bfs) __attribute__((noinline));

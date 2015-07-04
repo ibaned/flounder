@@ -1,8 +1,8 @@
 #ifndef SPACE_H
 #define SPACE_H
 
-#include "ints.h"
-#include "rgraph.h"
+#include "ints.cuh"
+#include "rgraph.cuh"
 #include <math.h>
 
 /* how many different things can we call "x"... */

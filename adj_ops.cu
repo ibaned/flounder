@@ -1,4 +1,4 @@
-#include "adj_ops.h"
+#include "adj_ops.cuh"
 
 static int const fevi[3][2] = {{0,1},{1,2},{2,0}};
 

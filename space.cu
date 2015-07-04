@@ -1,5 +1,5 @@
-#include "space.h"
-#include "mycuda.h"
+#include "space.cuh"
+#include "mycuda.cuh"
 
 struct xs xs_new(int n)
 {

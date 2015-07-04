@@ -1,8 +1,8 @@
 #ifndef RGRAPH_H
 #define RGRAPH_H
 
-#include "ints.h"
-#include "adj.h"
+#include "ints.cuh"
+#include "adj.cuh"
 
 struct rgraph {
   int nverts;
@@ -13,7 +13,7 @@ struct rgraph {
 struct rgraph rgraph_new(int nverts, int degree);
 void rgraph_free(struct rgraph g);
 
-static inline void rgraph_set(struct rgraph g, int i, int const a[])
+static __device__ inline void rgraph_set(struct rgraph g, int i, int const a[])
 {
   int* p = g.adj.i + i * g.degree;
   int* e = p + g.degree;
@@ -29,7 +29,7 @@ static __device__ inline void rgraph_get(struct rgraph g, int i, int a[])
     *a++ = *p++;
 }
 
-static inline struct adj adj_new_rgraph(struct rgraph g)
+static __device__ inline struct adj adj_new_rgraph(struct rgraph g)
 {
   struct adj a = adj_new(g.degree);
   a.n = g.degree;

@@ -1,4 +1,4 @@
-#include "vtk.h"
+#include "vtk.cuh"
 #include <stdio.h>
 
 void write_vtk(const char* filename, struct rgraph fvs, struct xs xs)
