@@ -23,12 +23,12 @@ void ints_free(struct ints is)
 struct ints ints_exscan(struct ints is)
 {
   struct ints o = ints_new(is.n + 1);
-  int a = 0;
-  o.i[0] = 0;
-  for (int i = 0; i < is.n; ++i) {
-    a += is.i[i];
-    o.i[i + 1] = a;
-  }
+  thrust::device_ptr<int> inp(is.i);
+  thrust::device_ptr<int> outp(o.i);
+  thrust::exclusive_scan(inp, inp + is.n, outp);
+  /* fixup the last element quirk */
+  int sum = thrust::reduce(inp, inp + is.n);
+  cudaMemcpy(o.i + is.n, &sum, sizeof(int), cudaMemcpyHostToDevice);
   return o;
 }
 
