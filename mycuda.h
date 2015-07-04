@@ -1,7 +1,7 @@
 #ifndef MYCUDA_H
 #define MYCUDA_H
 
-#define BLOCK_SIZE 128
+#define BLOCK_SIZE 256
 
 static inline int ceildiv(int a, int b)
 {
