@@ -23,7 +23,7 @@ struct ss {
 
 struct xs xs_new(int n);
 void xs_free(struct xs xs);
-struct xs xs_new_from_dat(int n, struct x const dat[]);
+struct xs xs_new_from_host(int n, struct x const dat[]);
 
 struct ss ss_new(int n);
 struct ss ss_new_const(int n, double v);
@@ -31,12 +31,12 @@ void ss_free(struct ss ss);
 
 struct ints ss_gt(struct ss a, struct ss b);
 
-static inline double x_cross(struct x a, struct x b)
+static __device__ inline double x_cross(struct x a, struct x b)
 {
   return a.x[0] * b.x[1] - a.x[1] * b.x[0];
 }
 
-static inline struct x x_sub(struct x a, struct x b)
+static __device__ inline struct x x_sub(struct x a, struct x b)
 {
   struct x c;
   c.x[0] = a.x[0] - b.x[0];
@@ -70,18 +70,18 @@ static inline double x_dot(struct x a, struct x b)
   return a.x[0] * b.x[0] + a.x[1] * b.x[1];
 }
 
-static inline double x_dist(struct x a, struct x b)
+static __device__ inline double x_dist(struct x a, struct x b)
 {
   struct x ab = x_sub(b, a);
   return sqrt(x_dot(ab, ab));
 }
 
-static inline double fx_area(struct x const x[3])
+static __device__ inline double fx_area(struct x const x[3])
 {
   return x_cross(x_sub(x[1], x[0]), x_sub(x[2], x[0])) / 2;
 }
 
-static inline double fx_qual(struct x const x[3])
+static __device__ inline double fx_qual(struct x const x[3])
 {
   double s;
   double lsq;
@@ -107,7 +107,7 @@ static inline struct x fx_center(struct x const x[3])
   return c;
 }
 
-static inline void xs_get(struct xs xs, int const v[], int nv, struct x x[])
+static __device__ inline void xs_get(struct xs xs, int const v[], int nv, struct x x[])
 {
   for (int i = 0; i < nv; ++i)
     x[i] = xs.x[v[i]];

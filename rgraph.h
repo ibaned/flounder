@@ -21,7 +21,7 @@ static inline void rgraph_set(struct rgraph g, int i, int const a[])
     *p++ = *a++;
 }
 
-static inline void rgraph_get(struct rgraph g, int i, int a[])
+static __device__ inline void rgraph_get(struct rgraph g, int i, int a[])
 {
   int* p = g.adj.i + i * g.degree;
   int* e = p + g.degree;

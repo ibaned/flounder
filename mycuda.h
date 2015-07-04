@@ -12,6 +12,6 @@ static inline int ceildiv(int a, int b)
 }
 
 #define CUDACALL(fname,n,args) \
-  fname<<< ceildiv((n), BLOCK_SIZE), BLOCK_SIZE >>>(args)
+  fname<<< ceildiv((n), BLOCK_SIZE), BLOCK_SIZE >>>args
 
 #endif

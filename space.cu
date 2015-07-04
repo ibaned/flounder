@@ -1,4 +1,5 @@
 #include "space.h"
+#include "mycuda.h"
 
 struct xs xs_new(int n)
 {
@@ -13,12 +14,10 @@ void xs_free(struct xs xs)
   cudaFree(xs.x);
 }
 
-struct xs xs_new_from_dat(int n, struct x const dat[])
+struct xs xs_new_from_host(int n, struct x const dat[])
 {
   struct xs xs = xs_new(n);
-  xs.n = n;
-  for (int i = 0; i < n; ++i)
-    xs.x[i] = dat[i];
+  cudaMemcpy(xs.x, dat, sizeof(struct x) * n, cudaMemcpyHostToDevice);
   return xs;
 }
 
@@ -30,11 +29,17 @@ struct ss ss_new(int n)
   return ss;
 }
 
+static __global__ void ss_new_const_0(struct ss ss, double v)
+{
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i < ss.n)
+    ss.s[i] = v;
+}
+
 struct ss ss_new_const(int n, double v)
 {
   struct ss ss = ss_new(n);
-  for (int i = 0; i < ss.n; ++i)
-    ss.s[i] = v;
+  CUDACALL(ss_new_const_0, n, (ss, v));
   return ss;
 }
 
@@ -43,23 +48,35 @@ void ss_free(struct ss ss)
   cudaFree(ss.s);
 }
 
+static __global__ void ss_gt_0(struct ints gts, struct ss a, struct ss b)
+{
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i < a.n)
+    gts.i[i] = (a.s[i] > b.s[i]);
+}
+
 struct ints ss_gt(struct ss a, struct ss b)
 {
   struct ints gts = ints_new(a.n);
-  for (int i = 0; i < a.n; ++i)
-    gts.i[i] = (a.s[i] > b.s[i]);
+  CUDACALL(ss_gt_0, a.n, (gts, a, b));
   return gts;
 }
 
-struct ss compute_areas(struct xs xs, struct rgraph fvs)
+static __global__ void compute_areas_0(struct ss as, struct xs xs, struct rgraph fvs)
 {
-  struct ss as = ss_new(fvs.nverts);
-  for (int i = 0; i < fvs.nverts; ++i) {
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i < fvs.nverts) {
     int fv[3];
     rgraph_get(fvs, i, fv);
     struct x fx[3];
     xs_get(xs, fv, 3, fx);
     as.s[i] = fx_area(fx);
   }
+}
+
+struct ss compute_areas(struct xs xs, struct rgraph fvs)
+{
+  struct ss as = ss_new(fvs.nverts);
+  CUDACALL(compute_areas_0, fvs.nverts, (as, xs, fvs));
   return as;
 }
