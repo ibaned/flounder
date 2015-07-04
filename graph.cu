@@ -45,8 +45,3 @@ void graph_print(struct graph g)
     printf("\n");
   }
 }
-
-struct adj adj_new_graph(struct graph g)
-{
-  return adj_new(g.max_deg);
-}

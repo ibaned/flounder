@@ -47,8 +47,11 @@ static inline void graph_set(struct graph g, int i, struct adj a)
     *p++ = *q++;
 }
 
-void graph_print(struct graph g);
+static inline struct adj adj_new_graph(struct graph g)
+{
+  return adj_new(g.max_deg);
+}
 
-struct adj adj_new_graph(struct graph g);
+void graph_print(struct graph g);
 
 #endif
