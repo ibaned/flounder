@@ -45,7 +45,7 @@ int main()
     {0,1}
   };
   struct rgraph fvs = rgraph_new_from_dat(2, 3, fvs_dat);
-  struct xs xs = xs_new_from_dat(4, x_dat);
+  struct xs xs = xs_new_from_host(4, x_dat);
   int done = 0;
   while (!done) {
     struct ss dss = gen_size_field(fvs, xs, linear);
