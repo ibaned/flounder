@@ -11,7 +11,7 @@ struct adj {
   int e[MAX_ADJ];
 };
 
-static inline struct adj adj_new(int c)
+static __device__ inline struct adj adj_new(int c)
 {
   struct adj a;
   a.n = 0;
@@ -20,12 +20,7 @@ static inline struct adj adj_new(int c)
   return a;
 }
 
-static inline void adj_free(struct adj a)
-{
-  (void)a;
-}
-
-static inline int adj_find(struct adj a, int e)
+static __device__ inline int adj_find(struct adj a, int e)
 {
   for (int i = 0; i < a.n; ++i)
     if (a.e[i] == e)
@@ -33,12 +28,12 @@ static inline int adj_find(struct adj a, int e)
   return -1;
 }
 
-static inline int adj_has(struct adj a, int e)
+static __device__ inline int adj_has(struct adj a, int e)
 {
   return adj_find(a, e) != -1;
 }
 
-static inline void adj_unite(struct adj* a, struct adj with)
+static __device__ inline void adj_unite(struct adj* a, struct adj with)
 {
   int j = a->n;
   for (int i = 0; i < with.n; ++i)
@@ -47,7 +42,7 @@ static inline void adj_unite(struct adj* a, struct adj with)
   a->n = j;
 }
 
-static inline void adj_intersect(struct adj* a, struct adj with)
+static __device__ inline void adj_intersect(struct adj* a, struct adj with)
 {
   int j = 0;
   for (int i = 0; i < a->n; ++i)
@@ -56,7 +51,7 @@ static inline void adj_intersect(struct adj* a, struct adj with)
   a->n = j;
 }
 
-static inline void adj_remove(struct adj* a, int e)
+static __device__ inline void adj_remove(struct adj* a, int e)
 {
   int i = adj_find(*a, e);
   assert(i >= 0);

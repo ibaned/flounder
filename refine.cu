@@ -1,6 +1,7 @@
 #include "refine.h"
 #include "graph_ops.h"
 #include "adj_ops.h"
+#include "mycuda.h"
 #include <float.h>
 
 static struct ints mark_fes(struct graph efs, struct ints bfs) __attribute__((noinline));
@@ -15,12 +16,11 @@ static struct rgraph split_faces(struct rgraph fvs,
     struct ints fwss, struct ints ewss, struct rgraph evs,
     struct graph efs, int nv) __attribute__((noinline));
 
-static struct ints mark_fes(struct graph efs, struct ints bfs)
+static __global__ void mark_fes_0(struct ints ecss, struct graph efs, struct ints bfs)
 {
-  struct ints ecss = ints_new(efs.nverts);
-  ints_zero(ecss);
-  struct adj ef = adj_new(efs.max_deg);
-  for (int i = 0; i < efs.nverts; ++i) {
+  int i = CUDAINDEX;
+  if (i < efs.nverts) {
+    struct adj ef = adj_new(efs.max_deg);
     graph_get(efs, i, &ef);
     for (int j = 0; j < ef.n; ++j)
       if (bfs.i[ef.e[j]]) {
@@ -28,7 +28,13 @@ static struct ints mark_fes(struct graph efs, struct ints bfs)
         break;
       }
   }
-  adj_free(ef);
+}
+
+static struct ints mark_fes(struct graph efs, struct ints bfs)
+{
+  struct ints ecss = ints_new(efs.nverts);
+  ints_zero(ecss);
+  CUDACALL(mark_fes_0, efs.nverts, (ecss, efs, bfs));
   return ecss;
 }
 
