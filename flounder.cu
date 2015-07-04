@@ -61,7 +61,7 @@ int main()
     xs = xs2;
   }
   printf("num faces %d\n", fvs.nverts);
-/*write_vtk("out.vtk", fvs, xs);*/
+  write_vtk("out.vtk", fvs, xs);
   xs_free(xs);
   rgraph_free(fvs);
   return 0;

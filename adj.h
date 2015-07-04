@@ -3,14 +3,27 @@
 
 #include <assert.h>
 
+#define MAX_ADJ 32
+
 struct adj {
   int n;
   int c;
-  int* e;
+  int e[MAX_ADJ];
 };
 
-struct adj adj_new(int c);
-void adj_free(struct adj a);
+static inline struct adj adj_new(int c)
+{
+  struct adj a;
+  a.n = 0;
+  a.c = c;
+  assert(c <= MAX_ADJ);
+  return a;
+}
+
+static inline void adj_free(struct adj a)
+{
+  (void)a;
+}
 
 static inline int adj_find(struct adj a, int e)
 {
