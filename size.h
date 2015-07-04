@@ -4,6 +4,8 @@
 #include "rgraph.h"
 #include "space.h"
 
+typedef double (*sizefun)(struct x);
+
 struct ss gen_size_field(struct rgraph fvs, struct xs xs,
     double (*fun)(struct x));
 

@@ -44,7 +44,7 @@ static __device__ inline struct x x_sub(struct x a, struct x b)
   return c;
 }
 
-static inline struct x x_add(struct x a, struct x b)
+static __device__ inline struct x x_add(struct x a, struct x b)
 {
   struct x c;
   c.x[0] = a.x[0] + b.x[0];
@@ -52,7 +52,7 @@ static inline struct x x_add(struct x a, struct x b)
   return c;
 }
 
-static inline struct x x_div(struct x a, double b)
+static __device__ inline struct x x_div(struct x a, double b)
 {
   struct x c;
   c.x[0] = a.x[0] / b;
@@ -60,12 +60,12 @@ static inline struct x x_div(struct x a, double b)
   return c;
 }
 
-static inline struct x x_avg(struct x a, struct x b)
+static __device__ inline struct x x_avg(struct x a, struct x b)
 {
   return x_div(x_add(a, b), 2);
 }
 
-static inline double x_dot(struct x a, struct x b)
+static __device__ inline double x_dot(struct x a, struct x b)
 {
   return a.x[0] * b.x[0] + a.x[1] * b.x[1];
 }
@@ -99,7 +99,7 @@ static __device__ inline double fx_qual(struct x const x[3])
   return (3.0 * 4.0 / sqrt(3.0)) * (a / s);
 }
 
-static inline struct x fx_center(struct x const x[3])
+static __device__ inline struct x fx_center(struct x const x[3])
 {
   struct x c;
   c.x[0] = (x[0].x[0] + x[1].x[0] + x[2].x[0]) / 3;
