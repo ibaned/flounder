@@ -21,10 +21,7 @@ struct graph_spec graph_spec_new(int nverts);
 struct graph graph_new(struct graph_spec s);
 void graph_free(struct graph g);
 
-static inline int graph_nedges(struct graph const g)
-{
-  return g.off.i[g.nverts];
-}
+int graph_nedges(struct graph const g);
 
 static inline int graph_deg(struct graph g, int i)
 {

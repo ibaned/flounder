@@ -1,6 +1,13 @@
 #include "graph.h"
 #include <stdio.h>
 
+int graph_nedges(struct graph const g)
+{
+  int nedges;
+  cudaMemcpy(&nedges, g.off.i + g.nverts, sizeof(int), cudaMemcpyDeviceToHost);
+  return nedges;
+}
+
 struct graph_spec graph_spec_new(int nverts)
 {
   struct graph_spec s;
