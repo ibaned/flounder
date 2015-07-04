@@ -2,6 +2,8 @@
 #include "graph_ops.cuh"
 #include "adj_ops.cuh"
 #include "mycuda.cuh"
+#include <thrust/device_ptr.h>
+#include <thrust/logical.h>
 #include <float.h>
 
 static struct ints mark_fes(struct graph efs, struct ints bfs) __attribute__((noinline));
@@ -80,55 +82,74 @@ static struct ss compute_split_quals(struct ints ecss, struct rgraph evs,
   return eqs;
 }
 
-static struct ints compute_best_indset(struct ints ecss, struct graph ees,
-    struct ss eqs)
+enum { WONT_SPLIT = 0, WILL_SPLIT = 1, COULD_SPLIT = 2 };
+
+static __global__ void compute_best_indset_0(struct ints ewss, struct ints ecss)
 {
-  enum { WONT_SPLIT = 0, WILL_SPLIT = 1, COULD_SPLIT = 2 };
-  struct ints ewss = ints_new(ecss.n);
-  struct ints ewss_old = ints_new(ecss.n);
-  for (int i = 0; i < ecss.n; ++i) {
+  int i = CUDAINDEX;
+  if (i < ecss.n) {
     if (ecss.i[i])
       ewss.i[i] = COULD_SPLIT;
     else
       ewss.i[i] = WONT_SPLIT;
   }
-  struct adj ee = adj_new(ees.max_deg);
+}
+
+static __global__ void compute_best_indset_1(struct ints ewss_old, struct ints ewss,
+    struct ints ecss, struct graph ees, struct ss eqs)
+{
+  int i = CUDAINDEX;
+  if (i < ecss.n) {
+    struct adj ee = adj_new_graph(ees);
+    if (ewss_old.i[i] != COULD_SPLIT)
+      return;
+    double q = eqs.s[i];
+    graph_get(ees, i, &ee);
+    for (int j = 0; j < ee.n; ++j)
+      if (ewss_old.i[ee.e[j]] == WILL_SPLIT)
+        ewss.i[i] = WONT_SPLIT;
+    if (ewss.i[i] != COULD_SPLIT)
+      return;
+    int local_max = 1;
+    for (int j = 0; j < ee.n; ++j) {
+      if (ewss_old.i[ee.e[j]] == WONT_SPLIT)
+        return;
+      assert(ee.e[j] != i);
+      double oq = eqs.s[ee.e[j]];
+      if (oq == q) {
+        if (ee.e[j] < i)
+          local_max = 0;
+      } else {
+        if (q < oq)
+          local_max = 0;
+      }
+    }
+    if (local_max)
+      ewss.i[i] = WILL_SPLIT;
+  }
+}
+
+struct is_determined {
+  bool operator()(int i) const
+  {
+    return i == WILL_SPLIT || i == WONT_SPLIT;
+  }
+};
+
+static struct ints compute_best_indset(struct ints ecss, struct graph ees,
+    struct ss eqs)
+{
+  struct ints ewss = ints_new(ecss.n);
+  struct ints ewss_old = ints_new(ecss.n);
+  CUDACALL(compute_best_indset_0, ecss.n, (ewss, ecss));
   int done = 0;
   int iter;
   for (iter = 0; !done; ++iter) {
-    done = 1;
     ints_copy(ewss_old, ewss);
-    for (int i = 0; i < ecss.n; ++i) {
-      if (ewss_old.i[i] != COULD_SPLIT)
-        continue;
-      double q = eqs.s[i];
-      graph_get(ees, i, &ee);
-      for (int j = 0; j < ee.n; ++j)
-        if (ewss_old.i[ee.e[j]] == WILL_SPLIT)
-          ewss.i[i] = WONT_SPLIT;
-      if (ewss.i[i] != COULD_SPLIT)
-        continue;
-      int local_max = 1;
-      for (int j = 0; j < ee.n; ++j) {
-        if (ewss_old.i[ee.e[j]] == WONT_SPLIT)
-          continue;
-        assert(ee.e[j] != i);
-        double oq = eqs.s[ee.e[j]];
-        if (oq == q) {
-          if (ee.e[j] < i)
-            local_max = 0;
-        } else {
-          if (q < oq)
-            local_max = 0;
-        }
-      }
-      if (local_max)
-        ewss.i[i] = WILL_SPLIT;
-      else
-        done = 0;
-    }
+    CUDACALL(compute_best_indset_1, ecss.n, (ewss_old, ewss, ecss, ees, eqs));
+    thrust::device_ptr<int> p(ewss.i);
+    done = thrust::all_of(p, p + ewss.n, is_determined());
   }
-  adj_free(ee);
   ints_free(ewss_old);
   return ewss;
 }
