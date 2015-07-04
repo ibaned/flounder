@@ -38,14 +38,14 @@ static struct ints mark_fes(struct graph efs, struct ints bfs)
   return ecss;
 }
 
-static struct ss compute_split_quals(struct ints ecss, struct rgraph evs,
-    struct graph efs, struct rgraph fvs, struct xs xs)
+static __global__ void compute_split_quals_0(struct ss eqs, struct ints ecss,
+    struct rgraph evs, struct graph efs, struct rgraph fvs, struct xs xs)
 {
-  struct ss eqs = ss_new(efs.nverts);
-  struct adj ef = adj_new(2);
-  for (int i = 0; i < ecss.n; ++i) {
+  int i = CUDAINDEX;
+  if (i < ecss.n) {
     if (!ecss.i[i])
-      continue;
+      return;
+    struct adj ef = adj_new(2);
     int ev[2];
     rgraph_get(evs, i, ev);
     struct x ex[2];
@@ -70,7 +70,13 @@ static struct ss compute_split_quals(struct ints ecss, struct rgraph evs,
     }
     eqs.s[i] = wq;
   }
-  adj_free(ef);
+}
+
+static struct ss compute_split_quals(struct ints ecss, struct rgraph evs,
+    struct graph efs, struct rgraph fvs, struct xs xs)
+{
+  struct ss eqs = ss_new(efs.nverts);
+  CUDACALL(compute_split_quals_0, ecss.n, (eqs, ecss, evs, efs, fvs, xs));
   return eqs;
 }
 
