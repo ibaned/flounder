@@ -37,10 +37,3 @@ void rgraph_print(struct rgraph g)
     printf("\n");
   }
 }
-
-struct adj adj_new_rgraph(struct rgraph g)
-{
-  struct adj a = adj_new(g.degree);
-  a.n = g.degree;
-  return a;
-}
