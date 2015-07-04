@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <limits.h>
+#include <thrust/reduce.h>
+#include <thrust/device_ptr.h>
 
 struct ints ints_new(int n)
 {
@@ -31,11 +34,8 @@ struct ints ints_exscan(struct ints is)
 
 int ints_max(struct ints is)
 {
-  int max = is.i[0];
-  for (int i = 1; i < is.n; ++i)
-    if (is.i[i] > max)
-      max = is.i[i];
-  return max;
+  thrust::device_ptr<int> p(is.i);
+  return thrust::reduce(p, p + is.n, INT_MIN, thrust::maximum<int>());
 }
 
 void ints_print(struct ints is)
