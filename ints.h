@@ -15,6 +15,7 @@ int ints_max(struct ints is);
 void ints_print(struct ints is);
 
 void ints_zero(struct ints is);
-void ints_from_dat(struct ints is, int const dat[]);
+void ints_copy(struct ints into, struct ints from);
+void ints_from_host(struct ints is, int const host_dat[]);
 
 #endif

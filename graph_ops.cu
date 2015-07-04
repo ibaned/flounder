@@ -16,7 +16,7 @@ struct graph rgraph_invert(struct rgraph rg)
   }
   struct graph g = graph_new(s);
   struct ints at = ints_new(nverts);
-  ints_from_dat(at, g.off.i);
+  ints_copy(at, g.off);
   for (int i = 0; i < rg.nverts; ++i) {
     rgraph_get(rg, i, a.e);
     for (int j = 0; j < a.n; ++j) {

@@ -2,6 +2,7 @@
 #include "mycuda.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 struct ints ints_new(int n)
 {
@@ -44,20 +45,18 @@ void ints_print(struct ints is)
     printf("%d: %d\n", i, is.i[i]);
 }
 
-__global__ void ints_zero_0(struct ints is)
-{
-  int i = blockIdx.x * blockDim.x + threadIdx.x;
-  if (i < is.n)
-    is.i[i] = 0;
-}
-
 void ints_zero(struct ints is)
 {
-  CUDACALL(ints_zero_0, is.n, is);
+  cudaMemset(is.i, 0, sizeof(int) * is.n);
 }
 
-void ints_from_dat(struct ints is, int const dat[])
+void ints_copy(struct ints into, struct ints from)
 {
-  for (int i = 0; i < is.n; ++i)
-    is.i[i] = dat[i];
+  assert(into.n >= from.n);
+  cudaMemcpy(into.i, from.i, sizeof(int) * from.n, cudaMemcpyDeviceToDevice);
+}
+
+void ints_from_host(struct ints is, int const host_dat[])
+{
+  cudaMemcpy(is.i, host_dat, sizeof(int) * is.n, cudaMemcpyHostToDevice);
 }

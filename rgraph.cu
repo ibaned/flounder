@@ -23,7 +23,7 @@ int rgraph_max_adj(struct rgraph g)
 struct rgraph rgraph_new_from_dat(int nverts, int degree, int const dat[])
 {
   struct rgraph g = rgraph_new(nverts, degree);
-  ints_from_dat(g.adj, dat);
+  ints_from_host(g.adj, dat);
   return g;
 }
 

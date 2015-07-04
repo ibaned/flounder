@@ -86,7 +86,7 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
   int iter;
   for (iter = 0; !done; ++iter) {
     done = 1;
-    ints_from_dat(ewss_old, ewss.i);
+    ints_copy(ewss_old, ewss);
     for (int i = 0; i < ecss.n; ++i) {
       if (ewss_old.i[i] != COULD_SPLIT)
         continue;
