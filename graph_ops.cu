@@ -93,15 +93,11 @@ struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
   return tg;
 }
 
-struct rgraph graph_bridge(struct graph g)
+static __global__ void graph_bridge_0(struct ints naes, struct graph g)
 {
-  int nhe = graph_nedges(g);
-  assert(nhe % 2 == 0);
-  int ne = nhe / 2;
-  struct rgraph rg = rgraph_new(ne, 2);
-  struct adj a = adj_new_graph(g);
-  struct ints naes = ints_new(g.nverts);
-  for (int i = 0; i < g.nverts; ++i) {
+  int i = CUDAINDEX;
+  if (i < g.nverts) {
+    struct adj a = adj_new_graph(g);
     graph_get(g, i, &a);
     int nae = 0;
     for (int j = 0; j < a.n; ++j)
@@ -109,10 +105,15 @@ struct rgraph graph_bridge(struct graph g)
         nae++;
     naes.i[i] = nae;
   }
-  struct ints os = ints_exscan(naes);
-  ints_free(naes);
-  int ra[2];
-  for (int i = 0; i < g.nverts; ++i) {
+}
+
+static __global__ void graph_bridge_1(struct rgraph rg, struct ints os,
+    struct graph g)
+{
+  int i = CUDAINDEX;
+  if (i < g.nverts) {
+    struct adj a = adj_new_graph(g);
+    int ra[2];
     ra[0] = i;
     graph_get(g, i, &a);
     int k = os.i[i];
@@ -122,7 +123,19 @@ struct rgraph graph_bridge(struct graph g)
         rgraph_set(rg, k++, ra);
       }
   }
+}
+
+struct rgraph graph_bridge(struct graph g)
+{
+  int nhe = graph_nedges(g);
+  assert(nhe % 2 == 0);
+  int ne = nhe / 2;
+  struct rgraph rg = rgraph_new(ne, 2);
+  struct ints naes = ints_new(g.nverts);
+  CUDACALL(graph_bridge_0, g.nverts, (naes, g));
+  struct ints os = ints_exscan(naes);
+  ints_free(naes);
+  CUDACALL(graph_bridge_1, g.nverts, (rg, os, g));
   ints_free(os);
-  adj_free(a);
   return rg;
 }
