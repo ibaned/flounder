@@ -1,10 +1,11 @@
 #include "size.cuh"
+#include "mycuda.cuh"
 
-struct ss gen_size_field(struct rgraph fvs, struct xs xs,
-    double (*fun)(struct x))
+static __global__ void gen_size_field_0(struct ss dss,
+    struct rgraph fvs, struct xs xs, sizefun fun)
 {
-  struct ss dss = ss_new(fvs.nverts);
-  for (int i = 0; i < dss.n; ++i) {
+  int i = CUDAINDEX;
+  if (i < dss.n) {
     int fv[3];
     rgraph_get(fvs, i, fv);
     struct x fx[3];
@@ -12,5 +13,11 @@ struct ss gen_size_field(struct rgraph fvs, struct xs xs,
     struct x c = fx_center(fx);
     dss.s[i] = fun(c);
   }
+}
+
+struct ss gen_size_field(struct rgraph fvs, struct xs xs, sizefun fun)
+{
+  struct ss dss = ss_new(fvs.nverts);
+  CUDACALL(gen_size_field_0, dss.n, (dss, fvs, xs, fun));
   return dss;
 }

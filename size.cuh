@@ -6,7 +6,6 @@
 
 typedef double (*sizefun)(struct x);
 
-struct ss gen_size_field(struct rgraph fvs, struct xs xs,
-    double (*fun)(struct x));
+struct ss gen_size_field(struct rgraph fvs, struct xs xs, sizefun fun);
 
 #endif
