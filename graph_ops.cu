@@ -1,30 +1,46 @@
 #include "graph_ops.cuh"
+#include "mycuda.cuh"
+
+static __global__ void rgraph_invert_0(struct graph_spec s, struct rgraph rg)
+{
+  int i = CUDAINDEX;
+  if (i < rg.nverts) {
+    struct adj a = adj_new_rgraph(rg);
+    rgraph_get(rg, i, a.e);
+    for (int j = 0; j < a.n; ++j) {
+      int* p = &(s.deg.i[a.e[j]]);
+      atomicAdd(p, 1);
+    }
+  }
+}
+
+static __global__ void rgraph_invert_1(struct graph g,
+    struct ints at, struct rgraph rg)
+{
+  int i = CUDAINDEX;
+  if (i < rg.nverts) {
+    struct adj a = adj_new_rgraph(rg);
+    rgraph_get(rg, i, a.e);
+    for (int j = 0; j < a.n; ++j) {
+      int av = a.e[j];
+      int* p = &(at.i[av]);
+      int o = atomicAdd(p, 1);
+      g.adj.i[o] = i;
+    }
+  }
+}
 
 struct graph rgraph_invert(struct rgraph rg)
 {
   int nverts = rgraph_max_adj(rg) + 1;
   struct graph_spec s = graph_spec_new(nverts);
   ints_zero(s.deg);
-  struct adj a = adj_new_rgraph(rg);
-  a.n = rg.degree;
-  for (int i = 0; i < rg.nverts; ++i) {
-    rgraph_get(rg, i, a.e);
-    for (int j = 0; j < a.n; ++j)
-      s.deg.i[a.e[j]]++;
-  }
+  CUDACALL(rgraph_invert_0, rg.nverts, (s, rg));
   struct graph g = graph_new(s);
   struct ints at = ints_new(nverts);
   ints_copy(at, g.off);
-  for (int i = 0; i < rg.nverts; ++i) {
-    rgraph_get(rg, i, a.e);
-    for (int j = 0; j < a.n; ++j) {
-      int av = a.e[j];
-      g.adj.i[at.i[av]] = i;
-      at.i[av]++;
-    }
-  }
+  CUDACALL(rgraph_invert_1, rg.nverts, (g, at, rg));
   ints_free(at);
-  adj_free(a);
   return g;
 }
 
