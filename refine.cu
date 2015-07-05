@@ -130,7 +130,7 @@ static __global__ void compute_best_indset_1(struct ints ewss_old, struct ints e
 }
 
 struct is_determined {
-  bool operator()(int i) const
+  __device__ bool operator()(int i) const
   {
     return i == WILL_SPLIT || i == WONT_SPLIT;
   }
@@ -179,7 +179,7 @@ static __global__ void split_edges_0(struct xs xs2, struct ints eos,
     struct xs xs, struct ints ewss, struct rgraph evs)
 {
   int i = CUDAINDEX;
-  if (i < ewss.n) {
+  if (i < ewss.n && ewss.i[i]) {
     int ev[2];
     rgraph_get(evs, i, ev);
     struct x ex[2];
@@ -202,6 +202,49 @@ static struct xs split_edges(struct xs xs,
   return xs2;
 }
 
+static __global__ void split_faces_0(struct rgraph fvs2, struct rgraph fvs,
+    struct ints fwss)
+{
+  int i = CUDAINDEX;
+  if (i < fwss.n && !fwss.i[i]) {
+    int fv[3];
+    rgraph_get(fvs, i, fv);
+    rgraph_set(fvs2, i, fv);
+  }
+}
+
+/* arguments, anyone ? */
+static __global__ void split_faces_1(
+    struct rgraph fvs2,
+    struct ints fos, struct ints eos,
+    struct rgraph fvs,
+    struct ints fwss, struct ints ewss,
+    struct rgraph evs, struct graph efs, int nv)
+{
+  int i = CUDAINDEX;
+  if (i < ewss.n && ewss.i[i]) {
+    struct adj ef = adj_new_graph(efs);
+    int ev[2];
+    rgraph_get(evs, i, ev);
+    graph_get(efs, i, &ef);
+    int sv = nv + eos.i[i];
+    for (int j = 0; j < ef.n; ++j) {
+      int f = ef.e[j];
+      int sf[2];
+      sf[0] = f;
+      sf[1] = fvs.nverts + fos.i[f];
+      int fv[3];
+      for (int k = 0; k < 2; ++k) {
+        rgraph_get(fvs, f, fv);
+        for (int l = 0; l < 3; ++l)
+          if (fv[l] == ev[k])
+            fv[l] = sv;
+        rgraph_set(fvs2, sf[k], fv);
+      }
+    }
+  }
+}
+
 static struct rgraph split_faces(struct rgraph fvs,
     struct ints fwss, struct ints ewss, struct rgraph evs,
     struct graph efs, int nv)
@@ -210,35 +253,9 @@ static struct rgraph split_faces(struct rgraph fvs,
   struct ints eos = ints_exscan(ewss);
   int nsf = fos.i[fwss.n];
   struct rgraph fvs2 = rgraph_new(fvs.nverts + nsf, 3);
-  for (int i = 0; i < fwss.n; ++i)
-    if (!fwss.i[i]) {
-      int fv[3];
-      rgraph_get(fvs, i, fv);
-      rgraph_set(fvs2, i, fv);
-    }
-  struct adj ef = adj_new_graph(efs);
-  for (int i = 0; i < ewss.n; ++i)
-    if (ewss.i[i]) {
-      int ev[2];
-      rgraph_get(evs, i, ev);
-      graph_get(efs, i, &ef);
-      int sv = nv + eos.i[i];
-      for (int j = 0; j < ef.n; ++j) {
-        int f = ef.e[j];
-        int sf[2];
-        sf[0] = f;
-        sf[1] = fvs.nverts + fos.i[f];
-        int fv[3];
-        for (int k = 0; k < 2; ++k) {
-          rgraph_get(fvs, f, fv);
-          for (int l = 0; l < 3; ++l)
-            if (fv[l] == ev[k])
-              fv[l] = sv;
-          rgraph_set(fvs2, sf[k], fv);
-        }
-      }
-    }
-  adj_free(ef);
+  CUDACALL(split_faces_0, fwss.n, (fvs2, fvs, fwss));
+  CUDACALL(split_faces_1, ewss.n,
+      (fvs2, fos, eos, fvs, fwss, ewss, evs, efs, nv));
   ints_free(eos);
   ints_free(fos);
   return fvs2;

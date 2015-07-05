@@ -23,12 +23,12 @@ void graph_free(struct graph g);
 
 int graph_nedges(struct graph const g);
 
-static inline int graph_deg(struct graph g, int i)
+static __device__ inline int graph_deg(struct graph g, int i)
 {
   return g.off.i[i + 1] - g.off.i[i];
 }
 
-static inline void graph_get(struct graph g, int i, struct adj* a)
+static __device__ inline void graph_get(struct graph g, int i, struct adj* a)
 {
   int* p = g.adj.i + g.off.i[i];
   int* e = g.adj.i + g.off.i[i + 1];
@@ -38,7 +38,7 @@ static inline void graph_get(struct graph g, int i, struct adj* a)
     *q++ = *p++;
 }
 
-static inline void graph_set(struct graph g, int i, struct adj a)
+static __device__ inline void graph_set(struct graph g, int i, struct adj a)
 {
   int* p = g.adj.i + g.off.i[i];
   int* e = g.adj.i + g.off.i[i + 1];
@@ -47,7 +47,7 @@ static inline void graph_set(struct graph g, int i, struct adj a)
     *p++ = *q++;
 }
 
-static inline struct adj adj_new_graph(struct graph g)
+static __device__ inline struct adj adj_new_graph(struct graph g)
 {
   return adj_new(g.max_deg);
 }
