@@ -154,38 +154,50 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
   return ewss;
 }
 
-static struct ints mark_split_faces(struct ints ewss, struct rgraph fes)
+static __global__ void mark_split_faces_0(struct ints fwss,
+    struct ints ewss, struct rgraph fes)
 {
-  struct ints fwss = ints_new(fes.nverts);
-  struct adj fe = adj_new_rgraph(fes);
-  for (int i = 0; i < fes.nverts; ++i) {
+  int i = CUDAINDEX;
+  if (i < fes.nverts) {
+    struct adj fe = adj_new_rgraph(fes);
     fwss.i[i] = 0;
     rgraph_get(fes, i, fe.e);
     for (int j = 0; j < fe.n; ++j)
       if (ewss.i[fe.e[j]])
         fwss.i[i] = 1;
   }
-  adj_free(fe);
+}
+
+static struct ints mark_split_faces(struct ints ewss, struct rgraph fes)
+{
+  struct ints fwss = ints_new(fes.nverts);
+  CUDACALL(mark_split_faces_0, fes.nverts, (fwss, ewss, fes));
   return fwss;
+}
+
+static __global__ void split_edges_0(struct xs xs2, struct ints eos,
+    struct xs xs, struct ints ewss, struct rgraph evs)
+{
+  int i = CUDAINDEX;
+  if (i < ewss.n) {
+    int ev[2];
+    rgraph_get(evs, i, ev);
+    struct x ex[2];
+    xs_get(xs, ev, 2, ex);
+    struct x mid = x_avg(ex[0], ex[1]);
+    xs2.x[xs.n + eos.i[i]] = mid;
+  }
 }
 
 static struct xs split_edges(struct xs xs,
     struct ints ewss, struct rgraph evs)
 {
   struct ints eos = ints_exscan(ewss);
-  int nse = eos.i[ewss.n];
+  int nse;
+  cudaMemcpy(&nse, eos.i + ewss.n, sizeof(int), cudaMemcpyDeviceToHost);
   struct xs xs2 = xs_new(xs.n + nse);
-  for (int i = 0; i < xs.n; ++i)
-    xs2.x[i] = xs.x[i];
-  for (int i = 0; i < ewss.n; ++i)
-    if (ewss.i[i]) {
-      int ev[2];
-      rgraph_get(evs, i, ev);
-      struct x ex[2];
-      xs_get(xs, ev, 2, ex);
-      struct x mid = x_avg(ex[0], ex[1]);
-      xs2.x[xs.n + eos.i[i]] = mid;
-    }
+  cudaMemcpy(xs2.x, xs.x, sizeof(struct x) * xs.n, cudaMemcpyDeviceToDevice);
+  CUDACALL(split_edges_0, ewss.n, (xs2, eos, xs, ewss, evs));
   ints_free(eos);
   return xs2;
 }
