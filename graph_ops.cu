@@ -44,14 +44,14 @@ struct graph rgraph_invert(struct rgraph rg)
   return g;
 }
 
-struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
+static __global__ void graph_rgraph_transit_0(struct graph_spec s,
+    struct graph g, struct rgraph rg)
 {
-  struct graph_spec s = graph_spec_new(g.nverts);
-  ints_zero(s.deg);
-  struct adj ga = adj_new_graph(g);
-  struct adj ra = adj_new_rgraph(rg);
-  struct adj ta = adj_new(ga.c * ra.c);
-  for (int i = 0; i < g.nverts; ++i) {
+  int i = CUDAINDEX;
+  if (i < g.nverts) {
+    struct adj ga = adj_new_graph(g);
+    struct adj ra = adj_new_rgraph(rg);
+    struct adj ta = adj_new(ga.c * ra.c);
     graph_get(g, i, &ga);
     rgraph_get(rg, ga.e[0], ta.e);
     ta.n = rg.degree;
@@ -61,8 +61,16 @@ struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
     }
     s.deg.i[i] = ta.n - 1;
   }
-  struct graph tg = graph_new(s);
-  for (int i = 0; i < g.nverts; ++i) {
+}
+
+static __global__ void graph_rgraph_transit_1(struct graph tg,
+    struct graph g, struct rgraph rg)
+{
+  int i = CUDAINDEX;
+  if (i < g.nverts) {
+    struct adj ga = adj_new_graph(g);
+    struct adj ra = adj_new_rgraph(rg);
+    struct adj ta = adj_new(ga.c * ra.c);
     graph_get(g, i, &ga);
     rgraph_get(rg, ga.e[0], ta.e);
     ta.n = rg.degree;
@@ -73,9 +81,15 @@ struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
     adj_remove(&ta, i);
     graph_set(tg, i, ta);
   }
-  adj_free(ga);
-  adj_free(ra);
-  adj_free(ta);
+}
+
+struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
+{
+  struct graph_spec s = graph_spec_new(g.nverts);
+  ints_zero(s.deg);
+  CUDACALL(graph_rgraph_transit_0, g.nverts, (s, g, rg));
+  struct graph tg = graph_new(s);
+  CUDACALL(graph_rgraph_transit_1, g.nverts, (tg, g, rg));
   return tg;
 }
 
