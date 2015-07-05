@@ -1,14 +1,16 @@
 #include "adj_ops.cuh"
+#include "mycuda.cuh"
 
-static int const fevi[3][2] = {{0,1},{1,2},{2,0}};
+static __device__ int const fevi[3][2] = {{0,1},{1,2},{2,0}};
 
-struct rgraph compute_fes(struct rgraph fvs, struct graph ves)
+static __global__ void compute_fes_0(struct rgraph fes,
+    struct rgraph fvs, struct graph ves)
 {
-  struct adj ve[2];
-  ve[0] = adj_new(ves.max_deg);
-  ve[1] = adj_new(ves.max_deg);
-  struct rgraph fes = rgraph_new(fvs.nverts, 3);
-  for (int i = 0; i < fvs.nverts; ++i) {
+  int i = CUDAINDEX;
+  if (i < fvs.nverts) {
+    struct adj ve[2];
+    ve[0] = adj_new_graph(ves);
+    ve[1] = adj_new_graph(ves);
     int fv[3];
     rgraph_get(fvs, i, fv);
     int fe[3];
@@ -23,7 +25,11 @@ struct rgraph compute_fes(struct rgraph fvs, struct graph ves)
     }
     rgraph_set(fes, i, fe);
   }
-  adj_free(ve[0]);
-  adj_free(ve[1]);
+}
+
+struct rgraph compute_fes(struct rgraph fvs, struct graph ves)
+{
+  struct rgraph fes = rgraph_new(fvs.nverts, 3);
+  CUDACALL(compute_fes_0, fvs.nverts, (fes, fvs, ves));
   return fes;
 }
