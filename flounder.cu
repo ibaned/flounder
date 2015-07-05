@@ -2,7 +2,6 @@
 #include <math.h>
 #include "refine.cuh"
 #include "size.cuh"
-#include "vtk.cuh"
 #include <stdio.h>
 
 __device__ double linear(struct x x)
@@ -67,7 +66,6 @@ int main()
     xs = xs2;
   }
   printf("num faces %d\n", fvs.nverts);
-  write_vtk("out.vtk", fvs, xs);
   xs_free(xs);
   rgraph_free(fvs);
   return 0;
