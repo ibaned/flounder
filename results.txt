@@ -18,6 +18,13 @@ refinement took 1.337145 seconds
 
 ==== atlas queue ====
 
+CUDA init took 12.293601 seconds
 num faces 1133760, BLOCK_SIZE 256
 refinement took 1.231766 seconds
+
+==== pbatch queue ====
+
+CUDA init took 2.886310 seconds
+num faces 1133760, BLOCK_SIZE 256
+refinement took 1.199261 seconds
 
