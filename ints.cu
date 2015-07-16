@@ -32,19 +32,10 @@ struct ints ints_exscan(struct ints is)
 
 int ints_max(struct ints is)
 {
-#if 0
   thrust::device_ptr<int> p(is.i);
-  return thrust::reduce(p, p + is.n, INT_MIN, thrust::maximum<int>());
-#else
-  int* hi = (int*) malloc(sizeof(int) * is.n);
-  CUDACALL(cudaMemcpy(hi, is.i, sizeof(int) * is.n, cudaMemcpyDeviceToHost));
-  int max = hi[0];
-  for (int i = 1; i < is.n; ++i)
-    if (hi[i] > max)
-      max = hi[i];
-  free(hi);
+  int max = thrust::reduce(p, p + is.n, INT_MIN, thrust::maximum<int>());
+  CUDACALL2(cudaDeviceSynchronize());
   return max;
-#endif
 }
 
 void ints_zero(struct ints is)
