@@ -7,7 +7,6 @@
 
 int main()
 {
-  fprintf(stderr, "main ! ...\n");
   int const fvs_dat[6] = {
     0,1,2,
     2,3,0
@@ -20,22 +19,22 @@ int main()
   };
   struct rgraph fvs = rgraph_new_from_host(2, 3, fvs_dat);
   struct xs xs = xs_new_from_host(4, x_dat);
-//int done = 0;
-//while (!done) {
-  {
+  int done = 0;
+  while (!done) {
     struct ss dss = gen_size_field(fvs, xs);
     struct rgraph fvs2;
     struct xs xs2;
     refine(fvs, xs, dss, &fvs2, &xs2);
-//  if (fvs.nverts == fvs2.nverts)
-//    done = 1;
+    if (fvs.nverts == fvs2.nverts)
+      done = 1;
     ss_free(dss);
     rgraph_free(fvs);
     xs_free(xs);
     fvs = fvs2;
     xs = xs2;
+    printf("num faces %d\n", fvs.nverts);
   }
-  printf("num faces %d\n", fvs.nverts);
+  fprintf(stderr, "reached size field, writing vtk...\n");
   write_vtk("out.vtk", &fvs, &xs);
   xs_free(xs);
   rgraph_free(fvs);

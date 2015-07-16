@@ -116,7 +116,7 @@ static __global__ void compute_best_indset_1(struct ints ewss_old, struct ints e
     int local_max = 1;
     for (int j = 0; j < ee.n; ++j) {
       if (ewss_old.i[ee.e[j]] == WONT_SPLIT)
-        return;
+        continue;
       assert(ee.e[j] != i);
       double oq = eqs.s[ee.e[j]];
       if (oq == q) {
@@ -164,6 +164,9 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
         done = 0;
     free(hi);
 #endif
+    fprintf(stderr, "indset iter %d\n", iter);
+    if (iter == 20)
+      abort();
   }
   ints_free(ewss_old);
   return ewss;
@@ -266,10 +269,8 @@ static struct rgraph split_faces(struct rgraph fvs,
 {
   struct ints fos = ints_exscan(fwss);
   struct ints eos = ints_exscan(ewss);
-  fprintf(stderr, "ints_exscans done\n");
   int nsf;
   CUDACALL(cudaMemcpy(&nsf, fos.i + fwss.n, sizeof(int), cudaMemcpyDeviceToHost));
-  fprintf(stderr, "memcpy done\n");
   struct rgraph fvs2 = rgraph_new(fvs.nverts + nsf, 3);
   CUDALAUNCH(split_faces_0, fwss.n, (fvs2, fvs, fwss));
   CUDALAUNCH(split_faces_1, ewss.n,
@@ -282,53 +283,37 @@ static struct rgraph split_faces(struct rgraph fvs,
 void refine(struct rgraph fvs, struct xs xs, struct ss dss,
     struct rgraph* pfvs2, struct xs* pxs2)
 {
-  fprintf(stderr, "start refine...\n");
+  fprintf(stderr, "start refine\n");
   struct graph vfs = rgraph_invert(fvs);
-  fprintf(stderr, "rgraph_invert done\n");
   struct graph vvs = graph_rgraph_transit(vfs, fvs);
-  fprintf(stderr, "graph_rgraph_transit done\n");
   graph_free(vfs);
   struct rgraph evs = graph_bridge(vvs);
-  fprintf(stderr, "graph_bridge done\n");
   graph_free(vvs);
   struct graph ves = rgraph_invert(evs);
-  fprintf(stderr, "rgraph_invert done\n");
   struct rgraph fes = compute_fes(fvs, ves);
-  fprintf(stderr, "compute_fes done\n");
   graph_free(ves);
   struct graph efs = rgraph_invert(fes);
-  fprintf(stderr, "rgraph_invert done\n");
   struct ss as = compute_areas(xs, fvs);
-  fprintf(stderr, "compute_areas done\n");
   struct ints bfs = ss_gt(as, dss);
-  fprintf(stderr, "ss_gt done\n");
   ss_free(as);
   struct ints ecss = mark_fes(efs, bfs);
-  fprintf(stderr, "mark_fes done\n");
   ints_free(bfs);
   struct ss eqs = compute_split_quals(ecss, evs, efs, fvs, xs);
-  fprintf(stderr, "compute_split_quals done\n");
   struct graph ees = graph_rgraph_transit(efs, fes);
-  fprintf(stderr, "graph_rgraph_transit done\n");
   struct ints ewss = compute_best_indset(ecss, ees, eqs);
-  fprintf(stderr, "compute_best_indset done\n");
   graph_free(ees);
   ss_free(eqs);
   ints_free(ecss);
   struct ints fwss = mark_split_faces(ewss, fes);
-  fprintf(stderr, "mark_split_faces done\n");
   rgraph_free(fes);
   struct xs xs2 = split_edges(xs, ewss, evs);
-  fprintf(stderr, "split_edges done\n");
   *pxs2 = xs2;
-  fprintf(stderr, "split_faces...\n");
   struct rgraph fvs2 = split_faces(fvs, fwss, ewss, evs, efs, xs.n);
-  fprintf(stderr, "split_faces done\n");
   *pfvs2 = fvs2;
   ints_free(fwss);
   ints_free(ewss);
   rgraph_free(evs);
   graph_free(efs);
-  fprintf(stderr, "refine done !\n");
+  fprintf(stderr, "stop refine\n");
 }
 
