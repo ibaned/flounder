@@ -56,6 +56,7 @@ int main()
     fvs = fvs2;
     xs = xs2;
   }
+  CUDACALL2(cudaDeviceSynchronize());
   double t3 = get_time();
   printf("num faces %d, BLOCK_SIZE %d\n", fvs.nverts, BLOCK_SIZE);
   printf("refinement took %f seconds\n", t3 - t2);

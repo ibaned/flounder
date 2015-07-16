@@ -28,14 +28,11 @@ do { \
 #define CUDACALL(f) \
 do { \
   CUDACALL2(f); \
-  CUDACALL2(cudaDeviceSynchronize()); \
 } while (0)
 
 #define CUDALAUNCH(fname,n,args) \
 do { \
   fname<<< ceildiv((n), BLOCK_SIZE), BLOCK_SIZE >>>args; \
-  CUDACALL2(cudaPeekAtLastError()); \
-  CUDACALL2(cudaDeviceSynchronize()); \
 } while (0)
 
 #define CUDAINDEX (blockIdx.x * blockDim.x + threadIdx.x)
