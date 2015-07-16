@@ -1,0 +1,2 @@
+gold_sinusoid, BLOCK_SIZE 256, stella
+timing: init 10.729267 seconds, refinement 1.870969 seconds

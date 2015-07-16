@@ -4,6 +4,24 @@
 #include "vtk.cuh"
 #include "mycuda.cuh"
 #include <stdio.h>
+#include <time.h>
+
+static double get_time(void)
+{
+  struct timespec ts;
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  double s = ts.tv_sec;
+  double ns = ts.tv_nsec;
+  s += (ns / 1e9);
+  return s;
+}
+
+static void trigger_cuda_init(void)
+{
+  int* p;
+  CUDACALL(cudaMalloc(&p, sizeof(int)));
+  CUDACALL(cudaFree(p));
+}
 
 int main()
 {
@@ -17,6 +35,9 @@ int main()
     {1,1},
     {0,1}
   };
+  double t0 = get_time();
+  trigger_cuda_init();
+  double t1 = get_time();
   struct rgraph fvs = rgraph_new_from_host(2, 3, fvs_dat);
   struct xs xs = xs_new_from_host(4, x_dat);
   int done = 0;
@@ -33,8 +54,11 @@ int main()
     fvs = fvs2;
     xs = xs2;
   }
+  double t2 = get_time();
   printf("num faces %d\n", fvs.nverts);
-  write_vtk("out.vtk", &fvs, &xs);
+  printf("timing: init %f seconds, refinement %f seconds\n",
+      t1 - t0, t2 - t1);
+//write_vtk("out.vtk", &fvs, &xs);
   xs_free(xs);
   rgraph_free(fvs);
   return 0;
