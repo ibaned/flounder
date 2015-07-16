@@ -3,7 +3,7 @@ timing: init 10.729267 seconds, refinement 1.870969 seconds
 num faces 1133760, BLOCK_SIZE 128
 timing: init 10.176637 seconds, refinement 1.789673 seconds
 
-==== and now with Thrust ====
+==== and now with Thrust, Stella queue ====
 
 num faces 1133760, BLOCK_SIZE 128
 refinement took 1.327338 seconds
@@ -15,4 +15,9 @@ num faces 1133760, BLOCK_SIZE 32
 refinement took 1.350877 seconds
 num faces 1133760, BLOCK_SIZE 512
 refinement took 1.337145 seconds
+
+==== atlas queue ====
+
+num faces 1133760, BLOCK_SIZE 256
+refinement took 1.231766 seconds
 
