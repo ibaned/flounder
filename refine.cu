@@ -266,7 +266,10 @@ static struct rgraph split_faces(struct rgraph fvs,
 {
   struct ints fos = ints_exscan(fwss);
   struct ints eos = ints_exscan(ewss);
-  int nsf = fos.i[fwss.n];
+  fprintf(stderr, "ints_exscans done\n");
+  int nsf;
+  CUDACALL(cudaMemcpy(&nsf, fos.i + fwss.n, sizeof(int), cudaMemcpyDeviceToHost));
+  fprintf(stderr, "memcpy done\n");
   struct rgraph fvs2 = rgraph_new(fvs.nverts + nsf, 3);
   CUDALAUNCH(split_faces_0, fwss.n, (fvs2, fvs, fwss));
   CUDALAUNCH(split_faces_1, ewss.n,
@@ -318,6 +321,7 @@ void refine(struct rgraph fvs, struct xs xs, struct ss dss,
   struct xs xs2 = split_edges(xs, ewss, evs);
   fprintf(stderr, "split_edges done\n");
   *pxs2 = xs2;
+  fprintf(stderr, "split_faces...\n");
   struct rgraph fvs2 = split_faces(fvs, fwss, ewss, evs, efs, xs.n);
   fprintf(stderr, "split_faces done\n");
   *pfvs2 = fvs2;
