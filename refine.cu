@@ -164,7 +164,6 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
         done = 0;
     free(hi);
 #endif
-    fprintf(stderr, "indset iter %d\n", iter);
     if (iter == 20)
       abort();
   }
@@ -283,7 +282,6 @@ static struct rgraph split_faces(struct rgraph fvs,
 void refine(struct rgraph fvs, struct xs xs, struct ss dss,
     struct rgraph* pfvs2, struct xs* pxs2)
 {
-  fprintf(stderr, "start refine\n");
   struct graph vfs = rgraph_invert(fvs);
   struct graph vvs = graph_rgraph_transit(vfs, fvs);
   graph_free(vfs);
@@ -314,6 +312,5 @@ void refine(struct rgraph fvs, struct xs xs, struct ss dss,
   ints_free(ewss);
   rgraph_free(evs);
   graph_free(efs);
-  fprintf(stderr, "stop refine\n");
 }
 

@@ -32,9 +32,8 @@ int main()
     xs_free(xs);
     fvs = fvs2;
     xs = xs2;
-    printf("num faces %d\n", fvs.nverts);
   }
-  fprintf(stderr, "reached size field, writing vtk...\n");
+  printf("num faces %d\n", fvs.nverts);
   write_vtk("out.vtk", &fvs, &xs);
   xs_free(xs);
   rgraph_free(fvs);
