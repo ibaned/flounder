@@ -52,7 +52,6 @@ int main()
   int done = 0;
   double t0 = omp_get_wtime();
   while (!done) {
-    double t1 = omp_get_wtime();
     struct ss dss = gen_size_field(fvs, xs, gold_sinusoid);
     struct rgraph fvs2;
     struct xs xs2;
@@ -64,8 +63,6 @@ int main()
     xs_free(xs);
     fvs = fvs2;
     xs = xs2;
-    double t2 = omp_get_wtime();
-    printf("refine step took %f seconds\n", t2 - t1);
   }
   double t3 = omp_get_wtime();
   printf("num faces %d\n", fvs.nverts);

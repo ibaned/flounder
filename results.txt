@@ -1,0 +1,27 @@
+shannon stella host CPU (16 cores):
+
+bash-4.1$ export OMP_NUM_THREADS=1
+bash-4.1$ srun ./flounder
+num faces 1133760
+total runtime 4.784049 seconds
+bash-4.1$ export OMP_NUM_THREADS=2
+bash-4.1$ srun ./flounder
+num faces 1133760
+total runtime 3.067512 seconds
+bash-4.1$ export OMP_NUM_THREADS=4
+bash-4.1$ srun ./flounder
+num faces 1133760
+total runtime 1.810604 seconds
+bash-4.1$ export OMP_NUM_THREADS=8
+bash-4.1$ srun ./flounder
+num faces 1133760
+total runtime 1.081528 seconds
+bash-4.1$ export OMP_NUM_THREADS=16
+bash-4.1$ srun ./flounder
+num faces 1133760
+total runtime 0.673095 seconds
+bash-4.1$ export OMP_NUM_THREADS=32
+bash-4.1$ srun ./flounder
+num faces 1133760
+total runtime 1.227087 seconds
+
