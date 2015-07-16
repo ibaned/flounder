@@ -44,7 +44,7 @@ struct graph rgraph_invert(struct rgraph rg)
   fprintf(stderr, "graph_new done\n");
   struct ints at = ints_new(nverts);
   fprintf(stderr, "ints_new done\n");
-  ints_copy(at, g.off);
+  ints_copy(at, g.off, nverts);
   fprintf(stderr, "start rgraph_invert_1\n");
   CUDALAUNCH(rgraph_invert_1, rg.nverts, (g, at, rg));
   fprintf(stderr, "stop rgraph_invert_1\n");

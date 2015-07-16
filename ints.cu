@@ -69,10 +69,9 @@ void ints_zero(struct ints is)
   CUDACALL(cudaMemset(is.i, 0, sizeof(int) * is.n));
 }
 
-void ints_copy(struct ints into, struct ints from)
+void ints_copy(struct ints into, struct ints from, int n)
 {
-  assert(into.n >= from.n);
-  CUDACALL(cudaMemcpy(into.i, from.i, sizeof(int) * from.n, cudaMemcpyDeviceToDevice));
+  CUDACALL(cudaMemcpy(into.i, from.i, sizeof(int) * n, cudaMemcpyDeviceToDevice));
 }
 
 void ints_from_host(struct ints is, int const host_dat[])

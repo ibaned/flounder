@@ -13,7 +13,7 @@ struct ints ints_exscan(struct ints is);
 int ints_max(struct ints is);
 
 void ints_zero(struct ints is);
-void ints_copy(struct ints into, struct ints from);
+void ints_copy(struct ints into, struct ints from, int n);
 void ints_from_host(struct ints is, int const host_dat[]);
 
 #endif

@@ -150,7 +150,7 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
   int done = 0;
   int iter;
   for (iter = 0; !done; ++iter) {
-    ints_copy(ewss_old, ewss);
+    ints_copy(ewss_old, ewss, ewss.n);
     CUDALAUNCH(compute_best_indset_1, ecss.n, (ewss_old, ewss, ecss, ees, eqs));
 #if 0
     thrust::device_ptr<int> p(ewss.i);
