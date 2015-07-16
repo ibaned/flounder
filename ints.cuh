@@ -16,4 +16,7 @@ void ints_zero(struct ints is);
 void ints_copy(struct ints into, struct ints from, int n);
 void ints_from_host(struct ints is, int const host_dat[]);
 
+void ints_to_host(struct ints* is);
+void ints_to_device(struct ints* is);
+
 #endif

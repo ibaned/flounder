@@ -29,6 +29,14 @@ static __device__ inline void rgraph_get(struct rgraph g, int i, int a[])
     *a++ = *p++;
 }
 
+static inline void rgraph_get_host(struct rgraph g, int i, int a[])
+{
+  int* p = g.adj.i + i * g.degree;
+  int* e = p + g.degree;
+  while (p < e)
+    *a++ = *p++;
+}
+
 static __device__ inline struct adj adj_new_rgraph(struct rgraph g)
 {
   struct adj a = adj_new(g.degree);
@@ -38,5 +46,8 @@ static __device__ inline struct adj adj_new_rgraph(struct rgraph g)
 
 int rgraph_max_adj(struct rgraph g);
 struct rgraph rgraph_new_from_host(int nverts, int degree, int const dat[]);
+
+void rgraph_to_host(struct rgraph* g);
+void rgraph_to_device(struct rgraph* g);
 
 #endif

@@ -78,3 +78,20 @@ void ints_from_host(struct ints is, int const host_dat[])
 {
   CUDACALL(cudaMemcpy(is.i, host_dat, sizeof(int) * is.n, cudaMemcpyHostToDevice));
 }
+
+void ints_to_host(struct ints* is)
+{
+  int* tmp = (int*) malloc(sizeof(int) * is->n);
+  CUDACALL(cudaMemcpy(tmp, is->i, sizeof(int) * is->n, cudaMemcpyDeviceToHost));
+  CUDACALL(cudaFree(is->i));
+  is->i = tmp;
+}
+
+void ints_to_device(struct ints* is)
+{
+  int* tmp;
+  CUDACALL(cudaMalloc(&tmp, sizeof(int) * is->n));
+  CUDACALL(cudaMemcpy(tmp, is->i, sizeof(int) * is->n, cudaMemcpyHostToDevice));
+  free(is->i);
+  is->i = tmp;
+}

@@ -80,3 +80,20 @@ struct ss compute_areas(struct xs xs, struct rgraph fvs)
   CUDALAUNCH(compute_areas_0, fvs.nverts, (as, xs, fvs));
   return as;
 }
+
+void xs_to_host(struct xs* xs)
+{
+  struct x* tmp = (struct x*) malloc(sizeof(struct x) * xs->n);
+  CUDACALL(cudaMemcpy(tmp, xs->x, sizeof(struct x) * xs->n, cudaMemcpyDeviceToHost));
+  CUDACALL(cudaFree(xs->x));
+  xs->x = tmp;
+}
+
+void xs_to_device(struct xs* xs)
+{
+  struct x* tmp;
+  CUDACALL(cudaMalloc(&tmp, sizeof(struct x) * xs->n));
+  CUDACALL(cudaMemcpy(tmp, xs->x, sizeof(struct x) * xs->n, cudaMemcpyHostToDevice));
+  free(xs->x);
+  xs->x = tmp;
+}

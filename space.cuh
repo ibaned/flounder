@@ -115,4 +115,7 @@ static __device__ inline void xs_get(struct xs xs, int const v[], int nv, struct
 
 struct ss compute_areas(struct xs xs, struct rgraph fvs);
 
+void xs_to_host(struct xs* xs);
+void xs_to_device(struct xs* xs);
+
 #endif

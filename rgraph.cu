@@ -25,3 +25,13 @@ struct rgraph rgraph_new_from_host(int nverts, int degree, int const dat[])
   ints_from_host(g.adj, dat);
   return g;
 }
+
+void rgraph_to_host(struct rgraph* g)
+{
+  ints_to_host(&g->adj);
+}
+
+void rgraph_to_device(struct rgraph* g)
+{
+  ints_to_device(&g->adj);
+}
