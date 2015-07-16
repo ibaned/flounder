@@ -2,9 +2,12 @@
 #include "graph_ops.cuh"
 #include "adj_ops.cuh"
 #include "mycuda.cuh"
+#if 0
 #include <thrust/device_ptr.h>
 #include <thrust/logical.h>
+#endif
 #include <float.h>
+#include <stdio.h>
 
 static struct ints mark_fes(struct graph efs, struct ints bfs) __attribute__((noinline));
 static struct ss compute_split_quals(struct ints ecss, struct rgraph evs,
@@ -129,12 +132,14 @@ static __global__ void compute_best_indset_1(struct ints ewss_old, struct ints e
   }
 }
 
+#if 0
 struct is_determined {
   __device__ bool operator()(int i) const
   {
     return i == WILL_SPLIT || i == WONT_SPLIT;
   }
 };
+#endif
 
 static struct ints compute_best_indset(struct ints ecss, struct graph ees,
     struct ss eqs)
@@ -147,8 +152,19 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
   for (iter = 0; !done; ++iter) {
     ints_copy(ewss_old, ewss);
     CUDACALL(compute_best_indset_1, ecss.n, (ewss_old, ewss, ecss, ees, eqs));
+#if 0
     thrust::device_ptr<int> p(ewss.i);
     done = thrust::all_of(p, p + ewss.n, is_determined());
+#else
+    int* hi = (int*) malloc(sizeof(int) * ewss.n);
+    cudaMemcpy(hi, ewss.i, sizeof(int) * ewss.n, cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+    done = 1;
+    for (int i = 0; i < ewss.n; ++i)
+      if (hi[i] == COULD_SPLIT)
+        done = 0;
+    free(hi);
+#endif
   }
   ints_free(ewss_old);
   return ewss;
@@ -195,8 +211,10 @@ static struct xs split_edges(struct xs xs,
   struct ints eos = ints_exscan(ewss);
   int nse;
   cudaMemcpy(&nse, eos.i + ewss.n, sizeof(int), cudaMemcpyDeviceToHost);
+  cudaDeviceSynchronize();
   struct xs xs2 = xs_new(xs.n + nse);
   cudaMemcpy(xs2.x, xs.x, sizeof(struct x) * xs.n, cudaMemcpyDeviceToDevice);
+  cudaDeviceSynchronize();
   CUDACALL(split_edges_0, ewss.n, (xs2, eos, xs, ewss, evs));
   ints_free(eos);
   return xs2;
@@ -264,35 +282,52 @@ static struct rgraph split_faces(struct rgraph fvs,
 void refine(struct rgraph fvs, struct xs xs, struct ss dss,
     struct rgraph* pfvs2, struct xs* pxs2)
 {
+  fprintf(stderr, "start refine...\n");
   struct graph vfs = rgraph_invert(fvs);
+  fprintf(stderr, "rgraph_invert done\n");
   struct graph vvs = graph_rgraph_transit(vfs, fvs);
+  fprintf(stderr, "graph_rgraph_transit done\n");
   graph_free(vfs);
   struct rgraph evs = graph_bridge(vvs);
+  fprintf(stderr, "graph_bridge done\n");
   graph_free(vvs);
   struct graph ves = rgraph_invert(evs);
+  fprintf(stderr, "rgraph_invert done\n");
   struct rgraph fes = compute_fes(fvs, ves);
+  fprintf(stderr, "compute_fes done\n");
   graph_free(ves);
   struct graph efs = rgraph_invert(fes);
+  fprintf(stderr, "rgraph_invert done\n");
   struct ss as = compute_areas(xs, fvs);
+  fprintf(stderr, "compute_areas done\n");
   struct ints bfs = ss_gt(as, dss);
+  fprintf(stderr, "ss_gt done\n");
   ss_free(as);
   struct ints ecss = mark_fes(efs, bfs);
+  fprintf(stderr, "mark_fes done\n");
   ints_free(bfs);
   struct ss eqs = compute_split_quals(ecss, evs, efs, fvs, xs);
+  fprintf(stderr, "compute_split_quals done\n");
   struct graph ees = graph_rgraph_transit(efs, fes);
+  fprintf(stderr, "graph_rgraph_transit done\n");
   struct ints ewss = compute_best_indset(ecss, ees, eqs);
+  fprintf(stderr, "compute_best_indset done\n");
   graph_free(ees);
   ss_free(eqs);
   ints_free(ecss);
   struct ints fwss = mark_split_faces(ewss, fes);
+  fprintf(stderr, "mark_split_faces done\n");
   rgraph_free(fes);
   struct xs xs2 = split_edges(xs, ewss, evs);
+  fprintf(stderr, "split_edges done\n");
   *pxs2 = xs2;
   struct rgraph fvs2 = split_faces(fvs, fwss, ewss, evs, efs, xs.n);
+  fprintf(stderr, "split_faces done\n");
   *pfvs2 = fvs2;
   ints_free(fwss);
   ints_free(ewss);
   rgraph_free(evs);
   graph_free(efs);
+  fprintf(stderr, "refine done !\n");
 }
 

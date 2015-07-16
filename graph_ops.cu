@@ -1,5 +1,6 @@
 #include "graph_ops.cuh"
 #include "mycuda.cuh"
+#include <stdio.h>
 
 static __global__ void rgraph_invert_0(struct graph_spec s, struct rgraph rg)
 {
@@ -32,14 +33,21 @@ static __global__ void rgraph_invert_1(struct graph g,
 
 struct graph rgraph_invert(struct rgraph rg)
 {
+  fprintf(stderr, "start rgraph_invert\n");
   int nverts = rgraph_max_adj(rg) + 1;
   struct graph_spec s = graph_spec_new(nverts);
   ints_zero(s.deg);
+  fprintf(stderr, "start rgraph_invert_0\n");
   CUDACALL(rgraph_invert_0, rg.nverts, (s, rg));
+  fprintf(stderr, "stop rgraph_invert_0\n");
   struct graph g = graph_new(s);
+  fprintf(stderr, "graph_new done\n");
   struct ints at = ints_new(nverts);
+  fprintf(stderr, "ints_new done\n");
   ints_copy(at, g.off);
+  fprintf(stderr, "start rgraph_invert_1\n");
   CUDACALL(rgraph_invert_1, rg.nverts, (g, at, rg));
+  fprintf(stderr, "stop rgraph_invert_1\n");
   ints_free(at);
   return g;
 }

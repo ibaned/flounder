@@ -12,7 +12,10 @@ static inline int ceildiv(int a, int b)
 }
 
 #define CUDACALL(fname,n,args) \
-  fname<<< ceildiv((n), BLOCK_SIZE), BLOCK_SIZE >>>args
+do { \
+  fname<<< ceildiv((n), BLOCK_SIZE), BLOCK_SIZE >>>args; \
+  cudaDeviceSynchronize(); \
+} while (0)
 
 #define CUDAINDEX (blockIdx.x * blockDim.x + threadIdx.x)
 

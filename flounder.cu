@@ -35,6 +35,7 @@ __device__ sizefun device_size_fun = linear;
 
 int main()
 {
+  fprintf(stderr, "main ! ...\n");
   int const fvs_dat[6] = {
     0,1,2,
     2,3,0
@@ -49,16 +50,18 @@ int main()
      to the host, and then pass it back into the device */
   sizefun host_size_fun;
   cudaMemcpyFromSymbol(&host_size_fun, device_size_fun, sizeof(sizefun));
+  cudaDeviceSynchronize();
   struct rgraph fvs = rgraph_new_from_host(2, 3, fvs_dat);
   struct xs xs = xs_new_from_host(4, x_dat);
-  int done = 0;
-  while (!done) {
+//int done = 0;
+//while (!done) {
+  {
     struct ss dss = gen_size_field(fvs, xs, host_size_fun);
     struct rgraph fvs2;
     struct xs xs2;
     refine(fvs, xs, dss, &fvs2, &xs2);
-    if (fvs.nverts == fvs2.nverts)
-      done = 1;
+//  if (fvs.nverts == fvs2.nverts)
+//    done = 1;
     ss_free(dss);
     rgraph_free(fvs);
     xs_free(xs);

@@ -6,6 +6,7 @@ struct xs xs_new(int n)
   struct xs xs;
   xs.n = n;
   cudaMalloc(&xs.x, sizeof(struct x) * n);
+  cudaDeviceSynchronize();
   return xs;
 }
 
@@ -18,6 +19,7 @@ struct xs xs_new_from_host(int n, struct x const dat[])
 {
   struct xs xs = xs_new(n);
   cudaMemcpy(xs.x, dat, sizeof(struct x) * n, cudaMemcpyHostToDevice);
+  cudaDeviceSynchronize();
   return xs;
 }
 
@@ -26,6 +28,7 @@ struct ss ss_new(int n)
   struct ss ss;
   ss.n = n;
   cudaMalloc(&ss.s, sizeof(double) * n);
+  cudaDeviceSynchronize();
   return ss;
 }
 

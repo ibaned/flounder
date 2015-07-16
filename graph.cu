@@ -1,9 +1,11 @@
 #include "graph.cuh"
+#include <stdio.h>
 
 int graph_nedges(struct graph const g)
 {
   int nedges;
   cudaMemcpy(&nedges, g.off.i + g.nverts, sizeof(int), cudaMemcpyDeviceToHost);
+  cudaDeviceSynchronize();
   return nedges;
 }
 
@@ -17,13 +19,19 @@ struct graph_spec graph_spec_new(int nverts)
 
 struct graph graph_new(struct graph_spec s)
 {
+  fprintf(stderr, "starting graph_new...\n");
   struct graph g;
   int nv = g.nverts = s.nverts;
+  fprintf(stderr, "starting exscan...\n");
   g.off = ints_exscan(s.deg);
+  fprintf(stderr, "done exscan...\n");
   int ne = graph_nedges(g);
   g.adj = ints_new(ne);
+  fprintf(stderr, "starting ints_max...\n");
   g.max_deg = ints_max(s.deg);
+  fprintf(stderr, "done ints_max...\n");
   ints_free(s.deg);
+  fprintf(stderr, "done graph_new...\n");
   return g;
 }
 
