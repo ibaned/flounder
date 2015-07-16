@@ -1,2 +1,6 @@
-gold_sinusoid, BLOCK_SIZE 256, stella
+num faces 1133760, BLOCK_SIZE 256
 timing: init 10.729267 seconds, refinement 1.870969 seconds
+num faces 1133760, BLOCK_SIZE 128
+timing: init 10.176637 seconds, refinement 1.789673 seconds
+
+

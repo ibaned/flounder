@@ -55,7 +55,7 @@ int main()
     xs = xs2;
   }
   double t2 = get_time();
-  printf("num faces %d\n", fvs.nverts);
+  printf("num faces %d, BLOCK_SIZE %d\n", fvs.nverts, BLOCK_SIZE);
   printf("timing: init %f seconds, refinement %f seconds\n",
       t1 - t0, t2 - t1);
 //write_vtk("out.vtk", &fvs, &xs);
