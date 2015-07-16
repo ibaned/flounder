@@ -2,36 +2,8 @@
 #include <math.h>
 #include "refine.cuh"
 #include "size.cuh"
+#include "mycuda.cuh"
 #include <stdio.h>
-
-__device__ double linear(struct x x)
-{
-  return 1e-5 + (1e-3) * x.x[0];
-}
-
-__device__ double ring(struct x x)
-{
-  struct x const c = {{.5,.5}};
-  double r = x_dist(x, c);
-  double d = 4 * fabs(r - .25);
-  return 5e-7 + d * 5e-5;
-}
-
-__device__ double sinusoid(struct x x)
-{
-  double s = cos(x.x[0] * 8.0 * M_PI) / 4.0 + 1.0 / 2.0;
-  double d = fabs(x.x[1] - s);
-  return 1e-6 + d * 1e-4;
-}
-
-__device__ double gold_sinusoid(struct x x)
-{
-  double s = cos(x.x[0] * 8.0 * M_PI) / 4.0 + 1.0 / 2.0;
-  double d = fabs(x.x[1] - s);
-  return 1e-7 + d * 1e-5;
-}
-
-__device__ sizefun device_size_fun = linear;
 
 int main()
 {
@@ -46,17 +18,12 @@ int main()
     {1,1},
     {0,1}
   };
-  /* get a pointer to the size field function from the device
-     to the host, and then pass it back into the device */
-  sizefun host_size_fun;
-  cudaMemcpyFromSymbol(&host_size_fun, device_size_fun, sizeof(sizefun));
-  cudaDeviceSynchronize();
   struct rgraph fvs = rgraph_new_from_host(2, 3, fvs_dat);
   struct xs xs = xs_new_from_host(4, x_dat);
 //int done = 0;
 //while (!done) {
   {
-    struct ss dss = gen_size_field(fvs, xs, host_size_fun);
+    struct ss dss = gen_size_field(fvs, xs);
     struct rgraph fvs2;
     struct xs xs2;
     refine(fvs, xs, dss, &fvs2, &xs2);

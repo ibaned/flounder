@@ -157,8 +157,7 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
     done = thrust::all_of(p, p + ewss.n, is_determined());
 #else
     int* hi = (int*) malloc(sizeof(int) * ewss.n);
-    cudaMemcpy(hi, ewss.i, sizeof(int) * ewss.n, cudaMemcpyDeviceToHost);
-    cudaDeviceSynchronize();
+    CUDACALL(cudaMemcpy(hi, ewss.i, sizeof(int) * ewss.n, cudaMemcpyDeviceToHost));
     done = 1;
     for (int i = 0; i < ewss.n; ++i)
       if (hi[i] == COULD_SPLIT)
@@ -210,11 +209,9 @@ static struct xs split_edges(struct xs xs,
 {
   struct ints eos = ints_exscan(ewss);
   int nse;
-  cudaMemcpy(&nse, eos.i + ewss.n, sizeof(int), cudaMemcpyDeviceToHost);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMemcpy(&nse, eos.i + ewss.n, sizeof(int), cudaMemcpyDeviceToHost));
   struct xs xs2 = xs_new(xs.n + nse);
-  cudaMemcpy(xs2.x, xs.x, sizeof(struct x) * xs.n, cudaMemcpyDeviceToDevice);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMemcpy(xs2.x, xs.x, sizeof(struct x) * xs.n, cudaMemcpyDeviceToDevice));
   CUDALAUNCH(split_edges_0, ewss.n, (xs2, eos, xs, ewss, evs));
   ints_free(eos);
   return xs2;

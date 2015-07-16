@@ -5,21 +5,19 @@ struct xs xs_new(int n)
 {
   struct xs xs;
   xs.n = n;
-  cudaMalloc(&xs.x, sizeof(struct x) * n);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMalloc(&xs.x, sizeof(struct x) * n));
   return xs;
 }
 
 void xs_free(struct xs xs)
 {
-  cudaFree(xs.x);
+  CUDACALL(cudaFree(xs.x));
 }
 
 struct xs xs_new_from_host(int n, struct x const dat[])
 {
   struct xs xs = xs_new(n);
-  cudaMemcpy(xs.x, dat, sizeof(struct x) * n, cudaMemcpyHostToDevice);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMemcpy(xs.x, dat, sizeof(struct x) * n, cudaMemcpyHostToDevice));
   return xs;
 }
 
@@ -27,8 +25,7 @@ struct ss ss_new(int n)
 {
   struct ss ss;
   ss.n = n;
-  cudaMalloc(&ss.s, sizeof(double) * n);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMalloc(&ss.s, sizeof(double) * n));
   return ss;
 }
 
@@ -48,7 +45,7 @@ struct ss ss_new_const(int n, double v)
 
 void ss_free(struct ss ss)
 {
-  cudaFree(ss.s);
+  CUDACALL(cudaFree(ss.s));
 }
 
 static __global__ void ss_gt_0(struct ints gts, struct ss a, struct ss b)

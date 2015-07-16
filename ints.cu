@@ -11,14 +11,13 @@ struct ints ints_new(int n)
 {
   struct ints is;
   is.n = n;
-  cudaMalloc(&is.i, sizeof(int) * n);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMalloc(&is.i, sizeof(int) * n));
   return is;
 }
 
 void ints_free(struct ints is)
 {
-  cudaFree(is.i);
+  CUDACALL(cudaFree(is.i));
 }
 
 struct ints ints_exscan(struct ints is)
@@ -30,21 +29,18 @@ struct ints ints_exscan(struct ints is)
   thrust::exclusive_scan(inp, inp + is.n, outp);
   /* fixup the last element quirk */
   int sum = thrust::reduce(inp, inp + is.n);
-  cudaMemcpy(o.i + is.n, &sum, sizeof(int), cudaMemcpyHostToDevice);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMemcpy(o.i + is.n, &sum, sizeof(int), cudaMemcpyHostToDevice));
 #else
   int* hi = (int*) malloc(sizeof(int) * (is.n + 1));
   int* ho = (int*) malloc(sizeof(int) * (is.n + 1));
-  cudaMemcpy(hi, is.i, sizeof(int) * is.n, cudaMemcpyDeviceToHost);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMemcpy(hi, is.i, sizeof(int) * is.n, cudaMemcpyDeviceToHost));
   int sum = 0;
   ho[0] = 0;
   for (int i = 0; i < is.n; ++i) {
     sum += hi[i];
     ho[i + 1] = sum;
   }
-  cudaMemcpy(o.i, ho, sizeof(int) * (is.n + 1), cudaMemcpyHostToDevice);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMemcpy(o.i, ho, sizeof(int) * (is.n + 1), cudaMemcpyHostToDevice));
   free(hi);
   free(ho);
 #endif
@@ -58,8 +54,7 @@ int ints_max(struct ints is)
   return thrust::reduce(p, p + is.n, INT_MIN, thrust::maximum<int>());
 #else
   int* hi = (int*) malloc(sizeof(int) * is.n);
-  cudaMemcpy(hi, is.i, sizeof(int) * is.n, cudaMemcpyDeviceToHost);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMemcpy(hi, is.i, sizeof(int) * is.n, cudaMemcpyDeviceToHost));
   int max = hi[0];
   for (int i = 1; i < is.n; ++i)
     if (hi[i] > max)
@@ -71,19 +66,16 @@ int ints_max(struct ints is)
 
 void ints_zero(struct ints is)
 {
-  cudaMemset(is.i, 0, sizeof(int) * is.n);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMemset(is.i, 0, sizeof(int) * is.n));
 }
 
 void ints_copy(struct ints into, struct ints from)
 {
   assert(into.n >= from.n);
-  cudaMemcpy(into.i, from.i, sizeof(int) * from.n, cudaMemcpyDeviceToDevice);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMemcpy(into.i, from.i, sizeof(int) * from.n, cudaMemcpyDeviceToDevice));
 }
 
 void ints_from_host(struct ints is, int const host_dat[])
 {
-  cudaMemcpy(is.i, host_dat, sizeof(int) * is.n, cudaMemcpyHostToDevice);
-  cudaDeviceSynchronize();
+  CUDACALL(cudaMemcpy(is.i, host_dat, sizeof(int) * is.n, cudaMemcpyHostToDevice));
 }

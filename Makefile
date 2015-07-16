@@ -1,5 +1,4 @@
 CC=nvcc
-CFLAGS = -g -G --compiler-options -fno-omit-frame-pointer
 
 all: flounder devinfo
 
