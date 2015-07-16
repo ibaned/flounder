@@ -59,7 +59,7 @@ int main()
   double t3 = get_time();
   printf("num faces %d, BLOCK_SIZE %d\n", fvs.nverts, BLOCK_SIZE);
   printf("refinement took %f seconds\n", t3 - t2);
-  write_vtk("out.vtk", &fvs, &xs);
+//write_vtk("out.vtk", &fvs, &xs);
   xs_free(xs);
   rgraph_free(fvs);
   return 0;
