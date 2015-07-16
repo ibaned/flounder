@@ -1,0 +1,1 @@
+3.92 user seconds using `time` on shannon stella
