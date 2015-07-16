@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define BLOCK_SIZE 128
+#define BLOCK_SIZE 512
 
 static inline int ceildiv(int a, int b)
 {
