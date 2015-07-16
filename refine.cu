@@ -2,10 +2,8 @@
 #include "graph_ops.cuh"
 #include "adj_ops.cuh"
 #include "mycuda.cuh"
-#if 0
 #include <thrust/device_ptr.h>
 #include <thrust/logical.h>
-#endif
 #include <float.h>
 #include <stdio.h>
 
@@ -132,14 +130,12 @@ static __global__ void compute_best_indset_1(struct ints ewss_old, struct ints e
   }
 }
 
-#if 0
 struct is_determined {
   __device__ bool operator()(int i) const
   {
-    return i == WILL_SPLIT || i == WONT_SPLIT;
+    return i != COULD_SPLIT;
   }
 };
-#endif
 
 static struct ints compute_best_indset(struct ints ecss, struct graph ees,
     struct ss eqs)
@@ -152,20 +148,9 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
   for (iter = 0; !done; ++iter) {
     ints_copy(ewss_old, ewss, ewss.n);
     CUDALAUNCH(compute_best_indset_1, ecss.n, (ewss_old, ewss, ecss, ees, eqs));
-#if 0
     thrust::device_ptr<int> p(ewss.i);
     done = thrust::all_of(p, p + ewss.n, is_determined());
-#else
-    int* hi = (int*) malloc(sizeof(int) * ewss.n);
-    CUDACALL(cudaMemcpy(hi, ewss.i, sizeof(int) * ewss.n, cudaMemcpyDeviceToHost));
-    done = 1;
-    for (int i = 0; i < ewss.n; ++i)
-      if (hi[i] == COULD_SPLIT)
-        done = 0;
-    free(hi);
-#endif
-    if (iter == 20)
-      abort();
+    CUDACALL2(cudaDeviceSynchronize());
   }
   ints_free(ewss_old);
   return ewss;

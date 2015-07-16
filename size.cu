@@ -38,7 +38,7 @@ static __global__ void gen_size_field_0(struct ss dss,
     struct x fx[3];
     xs_get(xs, fv, 3, fx);
     struct x c = fx_center(fx);
-    dss.s[i] = gold_sinusoid(c);
+    dss.s[i] = sinusoid(c);
   }
 }
 

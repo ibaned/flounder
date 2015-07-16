@@ -58,7 +58,7 @@ int main()
   printf("num faces %d, BLOCK_SIZE %d\n", fvs.nverts, BLOCK_SIZE);
   printf("timing: init %f seconds, refinement %f seconds\n",
       t1 - t0, t2 - t1);
-//write_vtk("out.vtk", &fvs, &xs);
+  write_vtk("out.vtk", &fvs, &xs);
   xs_free(xs);
   rgraph_free(fvs);
   return 0;
