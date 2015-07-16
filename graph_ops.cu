@@ -38,7 +38,7 @@ struct graph rgraph_invert(struct rgraph rg)
   struct graph_spec s = graph_spec_new(nverts);
   ints_zero(s.deg);
   fprintf(stderr, "start rgraph_invert_0\n");
-  CUDACALL(rgraph_invert_0, rg.nverts, (s, rg));
+  CUDALAUNCH(rgraph_invert_0, rg.nverts, (s, rg));
   fprintf(stderr, "stop rgraph_invert_0\n");
   struct graph g = graph_new(s);
   fprintf(stderr, "graph_new done\n");
@@ -46,7 +46,7 @@ struct graph rgraph_invert(struct rgraph rg)
   fprintf(stderr, "ints_new done\n");
   ints_copy(at, g.off);
   fprintf(stderr, "start rgraph_invert_1\n");
-  CUDACALL(rgraph_invert_1, rg.nverts, (g, at, rg));
+  CUDALAUNCH(rgraph_invert_1, rg.nverts, (g, at, rg));
   fprintf(stderr, "stop rgraph_invert_1\n");
   ints_free(at);
   return g;
@@ -95,9 +95,9 @@ struct graph graph_rgraph_transit(struct graph g, struct rgraph rg)
 {
   struct graph_spec s = graph_spec_new(g.nverts);
   ints_zero(s.deg);
-  CUDACALL(graph_rgraph_transit_0, g.nverts, (s, g, rg));
+  CUDALAUNCH(graph_rgraph_transit_0, g.nverts, (s, g, rg));
   struct graph tg = graph_new(s);
-  CUDACALL(graph_rgraph_transit_1, g.nverts, (tg, g, rg));
+  CUDALAUNCH(graph_rgraph_transit_1, g.nverts, (tg, g, rg));
   return tg;
 }
 
@@ -140,10 +140,10 @@ struct rgraph graph_bridge(struct graph g)
   int ne = nhe / 2;
   struct rgraph rg = rgraph_new(ne, 2);
   struct ints naes = ints_new(g.nverts);
-  CUDACALL(graph_bridge_0, g.nverts, (naes, g));
+  CUDALAUNCH(graph_bridge_0, g.nverts, (naes, g));
   struct ints os = ints_exscan(naes);
   ints_free(naes);
-  CUDACALL(graph_bridge_1, g.nverts, (rg, os, g));
+  CUDALAUNCH(graph_bridge_1, g.nverts, (rg, os, g));
   ints_free(os);
   return rg;
 }

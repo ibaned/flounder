@@ -30,6 +30,6 @@ static __global__ void compute_fes_0(struct rgraph fes,
 struct rgraph compute_fes(struct rgraph fvs, struct graph ves)
 {
   struct rgraph fes = rgraph_new(fvs.nverts, 3);
-  CUDACALL(compute_fes_0, fvs.nverts, (fes, fvs, ves));
+  CUDALAUNCH(compute_fes_0, fvs.nverts, (fes, fvs, ves));
   return fes;
 }

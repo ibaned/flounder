@@ -11,7 +11,15 @@ static inline int ceildiv(int a, int b)
   return c;
 }
 
-#define CUDACALL(fname,n,args) \
+#define CUDACALL(f) \
+do { \
+  cudaError_t err = f; \
+  if (err != cudaSuccess) \
+    fprintf(stderr, "call %s failed at %s:%d\n", \
+                    #f, __FILE__, __LINE__); \
+} while (0)
+
+#define CUDALAUNCH(fname,n,args) \
 do { \
   fname<<< ceildiv((n), BLOCK_SIZE), BLOCK_SIZE >>>args; \
   cudaDeviceSynchronize(); \

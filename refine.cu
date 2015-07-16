@@ -39,7 +39,7 @@ static struct ints mark_fes(struct graph efs, struct ints bfs)
 {
   struct ints ecss = ints_new(efs.nverts);
   ints_zero(ecss);
-  CUDACALL(mark_fes_0, efs.nverts, (ecss, efs, bfs));
+  CUDALAUNCH(mark_fes_0, efs.nverts, (ecss, efs, bfs));
   return ecss;
 }
 
@@ -81,7 +81,7 @@ static struct ss compute_split_quals(struct ints ecss, struct rgraph evs,
     struct graph efs, struct rgraph fvs, struct xs xs)
 {
   struct ss eqs = ss_new(efs.nverts);
-  CUDACALL(compute_split_quals_0, ecss.n, (eqs, ecss, evs, efs, fvs, xs));
+  CUDALAUNCH(compute_split_quals_0, ecss.n, (eqs, ecss, evs, efs, fvs, xs));
   return eqs;
 }
 
@@ -146,12 +146,12 @@ static struct ints compute_best_indset(struct ints ecss, struct graph ees,
 {
   struct ints ewss = ints_new(ecss.n);
   struct ints ewss_old = ints_new(ecss.n);
-  CUDACALL(compute_best_indset_0, ecss.n, (ewss, ecss));
+  CUDALAUNCH(compute_best_indset_0, ecss.n, (ewss, ecss));
   int done = 0;
   int iter;
   for (iter = 0; !done; ++iter) {
     ints_copy(ewss_old, ewss);
-    CUDACALL(compute_best_indset_1, ecss.n, (ewss_old, ewss, ecss, ees, eqs));
+    CUDALAUNCH(compute_best_indset_1, ecss.n, (ewss_old, ewss, ecss, ees, eqs));
 #if 0
     thrust::device_ptr<int> p(ewss.i);
     done = thrust::all_of(p, p + ewss.n, is_determined());
@@ -187,7 +187,7 @@ static __global__ void mark_split_faces_0(struct ints fwss,
 static struct ints mark_split_faces(struct ints ewss, struct rgraph fes)
 {
   struct ints fwss = ints_new(fes.nverts);
-  CUDACALL(mark_split_faces_0, fes.nverts, (fwss, ewss, fes));
+  CUDALAUNCH(mark_split_faces_0, fes.nverts, (fwss, ewss, fes));
   return fwss;
 }
 
@@ -215,7 +215,7 @@ static struct xs split_edges(struct xs xs,
   struct xs xs2 = xs_new(xs.n + nse);
   cudaMemcpy(xs2.x, xs.x, sizeof(struct x) * xs.n, cudaMemcpyDeviceToDevice);
   cudaDeviceSynchronize();
-  CUDACALL(split_edges_0, ewss.n, (xs2, eos, xs, ewss, evs));
+  CUDALAUNCH(split_edges_0, ewss.n, (xs2, eos, xs, ewss, evs));
   ints_free(eos);
   return xs2;
 }
@@ -271,8 +271,8 @@ static struct rgraph split_faces(struct rgraph fvs,
   struct ints eos = ints_exscan(ewss);
   int nsf = fos.i[fwss.n];
   struct rgraph fvs2 = rgraph_new(fvs.nverts + nsf, 3);
-  CUDACALL(split_faces_0, fwss.n, (fvs2, fvs, fwss));
-  CUDACALL(split_faces_1, ewss.n,
+  CUDALAUNCH(split_faces_0, fwss.n, (fvs2, fvs, fwss));
+  CUDALAUNCH(split_faces_1, ewss.n,
       (fvs2, fos, eos, fvs, fwss, ewss, evs, efs, nv));
   ints_free(eos);
   ints_free(fos);

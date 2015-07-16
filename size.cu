@@ -18,6 +18,6 @@ static __global__ void gen_size_field_0(struct ss dss,
 struct ss gen_size_field(struct rgraph fvs, struct xs xs, sizefun fun)
 {
   struct ss dss = ss_new(fvs.nverts);
-  CUDACALL(gen_size_field_0, dss.n, (dss, fvs, xs, fun));
+  CUDALAUNCH(gen_size_field_0, dss.n, (dss, fvs, xs, fun));
   return dss;
 }
